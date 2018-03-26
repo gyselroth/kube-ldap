@@ -1,4 +1,7 @@
 # kube-ldap
+[![Build Status](https://travis-ci.org/gyselroth/kube-ldap.svg?branch=master)](https://travis-ci.org/gyselroth/kube-ldap)
+ [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A [Webhook Token Authentication](https://kubernetes.io/docs/admin/authentication/#webhook-token-authentication) plugin for kubernetes,  written in javascript, to use LDAP as authentication source.
 
 ## Description
@@ -11,43 +14,8 @@ It exposes two API endpoints:
   * Is called by kubernetes (see [TokenReview](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.9/#tokenreview-v1-authentication)) to verify the token used for authentication.
   * Verifies the integrity of the JWT (using the signature) and returns a TokenReview response containing the username, uid and group memberships of the authenticated user.
 
-## Development
-### Requirements
-* nodejs
-* yarn
-
-### Development Server
-During development an auto-reloading development server (using babel watch) can be used:
-```bash
-yarn start
-```
-
-### Test
-To run automated tests using jest you can use yarn:
-```bash
-yarn test
-```
-
-### Build
-kube-ldap can be built via yarn, to get native nodejs code, or via docker (which uses yarn), to get a docker image.
-
-Either way the build process lints the code (including flow type annotations) before building. When building via docker the process also includes running the automated tests.
-If any of these steps fail, the build will fail too.
-
-#### yarn
-When using yarn, it places the build output in `./build/` directory.
-```bash
-yarn build
-```
-
-#### docker
-When using docker, the `./Dockerfile` is used to build an image.
-```bash
-docker -t kube-ldap build .
-```
-
 ## Deployment
-The recommended way to deploy kube-ldap is deplyoing kube-ldap in kubernetes itself using the [kube-ldap docker image](https://hub.docker.com/r/gyselroth/kube-ldap/).
+The recommended way to deploy kube-ldap is deplyoing kube-ldap in kubernetes itself using the [gyselroth/kube-ldap](https://hub.docker.com/r/gyselroth/kube-ldap/) docker image.
 
 Example YAML for kubernetes (secrets, deployment and service):
 ```yaml
@@ -197,4 +165,40 @@ To refresh your token after expiration:
 ```bash
 curl TOKEN=$(https://your-kube-ldap-url/auth -u your-username)
 kubectl config set-credentials your-cluster-ldap --token="$TOKEN"
+```
+
+
+## Development
+### Requirements
+* nodejs
+* yarn
+
+### Development Server
+During development an auto-reloading development server (using babel watch) can be used:
+```bash
+yarn start
+```
+
+### Test
+To run automated tests using jest you can use yarn:
+```bash
+yarn test
+```
+
+### Build
+kube-ldap can be built via yarn, to get native nodejs code, or via docker (which uses yarn), to get a docker image.
+
+Either way the build process lints the code (including flow type annotations) before building. When building via docker the process also includes running the automated tests.
+If any of these steps fail, the build will fail too.
+
+#### yarn
+When using yarn, it places the build output in `./build/` directory.
+```bash
+yarn build
+```
+
+#### docker
+When using docker, the `./Dockerfile` is used to build an image.
+```bash
+docker -t kube-ldap build .
 ```
