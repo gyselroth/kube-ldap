@@ -1,0 +1,12 @@
+sudo: required
+services:
+  - docker
+language: node_js
+node_js: "lts/*"
+cache: yarn
+after_success:
+  - docker build -t gyselroth/kube-ldap:$TRAVIS_BRANCH
+  - [ "$TRAVIS_TAG" != "" ] && docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+  - [ "$TRAVIS_TAG" != "" ] && docker tag gyselroth/kube-ldap:$TRAVIS_BRANCH gyselroth/kube-ldap:latest
+  - [ "$TRAVIS_TAG" != "" ] && docker push gyselroth/kube-ldap:$TRAVIS_BRANCH
+  - [ "$TRAVIS_TAG" != "" ] && docker push gyselroth/kube-ldap:latest
