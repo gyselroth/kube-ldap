@@ -1,0 +1,40 @@
+{
+  "name": "kube-ldap",
+  "version": "1.0.0",
+  "description": "kubernetes token webhook to check bearer tokens against ldap",
+  "main": "src/index.js",
+  "author": "Fabian Jucker <jucker@gyselroth.com>",
+  "license": "MIT",
+  "dependencies": {
+    "atob": "^2.0.3",
+    "babel-polyfill": "^6.26.0",
+    "body-parser": "^1.18.2",
+    "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "jsonwebtoken": "^8.2.0",
+    "ldapjs": "^1.0.2",
+    "morgan": "^1.9.0",
+    "winston": "^2.4.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.2.2",
+    "babel-jest": "^22.4.3",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-regenerator": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-flow": "^6.23.0",
+    "babel-watch": "^2.0.7",
+    "eslint": "^4.19.0",
+    "eslint-config-google": "^0.9.1",
+    "eslint-plugin-flowtype": "^2.46.1",
+    "flow-bin": "^0.68.0",
+    "jest": "^22.4.3"
+  },
+  "scripts": {
+    "start": "babel-watch src/index.js",
+    "build": "yarn run eslint --fix src/ && yarn run flow && yarn run babel src/ --ignore=__mocks__/** -d build/",
+    "prepublish": "yarn run build",
+    "test": "jest"
+  }
+}
