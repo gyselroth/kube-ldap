@@ -18,13 +18,13 @@ It exposes two API endpoints:
 
 ### Development Server
 During development an auto-reloading development server (using babel watch) can be used:
-```
+```bash
 yarn start
 ```
 
 ### Test
 To run automated tests using jest you can use yarn:
-```
+```bash
 yarn test
 ```
 
@@ -36,13 +36,13 @@ If any of these steps fail, the build will fail too.
 
 #### yarn
 When using yarn, it places the build output in `./build/` directory.
-```
+```bash
 yarn build
 ```
 
 #### docker
 When using docker, the `./Dockerfile` is used to build an image.
-```
+```bash
 docker -t kube-ldap build .
 ```
 
@@ -50,7 +50,7 @@ docker -t kube-ldap build .
 The recommended way to deploy kube-ldap is deplyoing kube-ldap in kubernetes itself using the [kube-ldap docker image](https://hub.docker.com/r/gyselroth/kube-ldap/).
 
 Example YAML for kubernetes (secrets, deployment and service):
-```
+```yaml
 apiVersion: v1
 data:
   key: #base64 encoded jwt key (see "Configuration" in README)
@@ -164,7 +164,7 @@ List of configurable values:
 
 ### kubernetes
 Configure your kubernetes apiserver to use the kube-ldap [webhook for authentication](https://kubernetes.io/docs/admin/authentication/#webhook-token-authentication) using the following configuration file.
-```
+```yaml
 # clusters refers to the remote service.
 clusters:
   - name: kube-ldap
@@ -186,7 +186,7 @@ contexts:
 
 ### kubectl
 To configure `kubectl` initially:
-```
+```bash
 curl TOKEN=$(https://your-kube-ldap-url/auth -u your-username)
 kubectl config set-cluster your-cluster --server=https://your-apiserver-url [...]
 kubectl config set-credentials your-cluster-ldap --token="$TOKEN"
@@ -194,7 +194,7 @@ kubectl config set-context your-cluster --cluster=your-cluster --user=your-clust
 ```
 
 To refresh your token after expiration:
-```
+```bash
 curl TOKEN=$(https://your-kube-ldap-url/auth -u your-username)
 kubectl config set-credentials your-cluster-ldap --token="$TOKEN"
 ```
