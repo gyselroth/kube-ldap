@@ -17,7 +17,9 @@ It exposes two API endpoints:
 ## Deployment
 The recommended way to deploy kube-ldap is deplyoing kube-ldap in kubernetes itself using the [gyselroth/kube-ldap](https://hub.docker.com/r/gyselroth/kube-ldap/) docker image.
 
-Example YAML for kubernetes (secrets, deployment and service):
+**IMPORTANT:** kube-ldap currently works with plain HTTP. Transport of user credentials should be protected by some means transport encryption (like TLS/SSL). Therefore is highly recommended to use kube-ldap behind a TLS-protected reverse proxy only (like nginx).
+
+Example YAML for kubernetes (secrets, deployment including tls termination and service):
 ```yaml
 apiVersion: v1
 data:
@@ -38,6 +40,31 @@ metadata:
   namespace: kube-system
 type: Opaque
 ---
+apiVersion: v1
+data:
+  tls.crt: #base64 encoded certificate (pem)
+  tls.key: #base64 encoded private key (pem)
+kind: Secret
+metadata:
+  name: kube-ldap-nginx-tls
+  namespace: kube-system
+type: kubernetes.io/tls
+---
+apiVersion: v1
+items:
+- apiVersion: v1
+  data:
+    default.conf: "server {\n    listen 8081;\n    ssl on;\n    ssl_certificate /etc/ssl/nginx/tls.crt;\n
+      \   ssl_certificate_key /etc/ssl/nginx/tls.key;\n    add_header Strict-Transport-Security
+      \"max-age=31556926\";\n    ssl_prefer_server_ciphers on;\n    ssl_protocols
+      TLSv1 TLSv1.1 TLSv1.2;\n    \n\n    location / {\n        proxy_pass http://localhost:8080;\n
+      \       add_header Front-End-Https on;\n    }\n}\n\t\n"
+  kind: ConfigMap
+  metadata:
+    name: kube-ldap-nginx-conf
+    namespace: kube-system
+kind: List
+---
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -55,7 +82,24 @@ spec:
       labels:
         k8s-app: kube-ldap
     spec:
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: kube-ldap-nginx-conf
+      - name: nginx-tls
+        secret:
+          secretName: kube-ldap-nginx-tls
       containers:
+      - name: kube-ldap-nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 8081
+        volumeMounts:
+          - name: nginx-config
+            mountPath: /etc/nginx/conf.d/default.conf
+            subPath: default.conf
+          - name: nginx-tls
+            mountPath: "/etc/ssl/nginx"
       - env:
         - name: LDAP_URI
           value: #ldap uri (see "Configuration" in README)
@@ -103,9 +147,9 @@ metadata:
   namespace: kube-system
 spec:
   ports:
-  - port: 8080
+  - port: 8081
     protocol: TCP
-    targetPort: 8080
+    targetPort: 8081
   selector:
     k8s-app: kube-ldap
   type: ClusterIP
