@@ -42,28 +42,13 @@ type: Opaque
 ---
 apiVersion: v1
 data:
-  tls.crt: #base64 encoded certificate (pem)
-  tls.key: #base64 encoded private key (pem)
+  cert.pem: #base64 encoded certificate (pem)
+  key.pem: #base64 encoded private key (pem)
 kind: Secret
 metadata:
-  name: kube-ldap-nginx-tls
+  name: kube-ldap-tls
   namespace: kube-system
 type: kubernetes.io/tls
----
-apiVersion: v1
-items:
-- apiVersion: v1
-  data:
-    default.conf: "server {\n    listen 8081;\n    ssl on;\n    ssl_certificate /etc/ssl/nginx/tls.crt;\n
-      \   ssl_certificate_key /etc/ssl/nginx/tls.key;\n    add_header Strict-Transport-Security
-      \"max-age=31556926\";\n    ssl_prefer_server_ciphers on;\n    ssl_protocols
-      TLSv1 TLSv1.1 TLSv1.2;\n    \n\n    location / {\n        proxy_pass http://localhost:8080;\n
-      \       add_header Front-End-Https on;\n    }\n}\n\t\n"
-  kind: ConfigMap
-  metadata:
-    name: kube-ldap-nginx-conf
-    namespace: kube-system
-kind: List
 ---
 apiVersion: apps/v1beta2
 kind: Deployment
@@ -83,23 +68,10 @@ spec:
         k8s-app: kube-ldap
     spec:
       volumes:
-      - name: nginx-config
-        configMap:
-          name: kube-ldap-nginx-conf
-      - name: nginx-tls
+      - name: kube-ldap-tls
         secret:
-          secretName: kube-ldap-nginx-tls
+          secretName: kube-ldap-tls
       containers:
-      - name: kube-ldap-nginx
-        image: nginx:alpine
-        ports:
-        - containerPort: 8081
-        volumeMounts:
-          - name: nginx-config
-            mountPath: /etc/nginx/conf.d/default.conf
-            subPath: default.conf
-          - name: nginx-tls
-            mountPath: "/etc/ssl/nginx"
       - env:
         - name: LDAP_URI
           value: #ldap uri (see "Configuration" in README)
@@ -127,6 +99,9 @@ spec:
         - name: JWT_TOKEN_LIFETIME
           value: #jwt token lifetime (see "Configuration" in README)
         image: gyselroth/kube-ldap
+        volumeMounts:
+          - name: kube-ldap-tls
+            mountPath: "/etc/ssl/kube-ldap"
         livenessProbe:
           httpGet:
             path: /healthz
@@ -136,7 +111,7 @@ spec:
           periodSeconds: 10
         name: kube-ldap
         ports:
-        - containerPort: 8080
+        - containerPort: 8081
 ---
 apiVersion: v1
 kind: Service
@@ -164,8 +139,12 @@ List of configurable values:
 
 |Setting|Description|Environment Variable| Default Value|
 |-------|-----------|--------------------|--------------|
-|`config.port`|HTTP port to listen|`PORT`|8080|
+|`config.port`|HTTP port to listen|`PORT`|8081 (8080 if TLS is disabled)|
 |`config.loglevel`|Loglevel for winston logger|`LOGLEVEL`|debug|
+|`config.tls.enabled`|Enable TLS (HTTPS). **DO NOT DISABLE IN PRODUCTION UNLESS YOU HAVE A TLS REVERSE PROXY IN PLACE**|`TLS_ENABLED` ("true" or "false")|true|
+|`config.tls.cert`|Path to certificate (pem) to use for TLS (HTTPS)|`TLS_CERT_PATH`|/etc/ssl/kube-ldap/cert.pem|
+|`config.tls.key`|Path to private key (pem) to use for TLS (HTTPS)|`TLS_KEY_PATH`|/etc/ssl/kube-ldap/key.pem|
+|`config.tls.ca`|*Optional: Path to ca certificate (pem) to use for TLS (HTTPS)*|`TLS_CA_PATH`|*none*|
 |`config.ldap.uri`|URI of LDAP server|`LDAP_URI`|ldap://ldap.example.com|
 |`config.ldap.binddn`|DN of LDAP bind user connection|`LDAP_BINDDN`|uid=bind,dc=example,dc=com|
 |`config.ldap.bindpw`|Password of LDAP bind user|`LDAP_BINDPW`|secret|
@@ -218,9 +197,11 @@ kubectl config set-credentials your-cluster-ldap --token="$TOKEN"
 * yarn
 
 ### Development Server
-During development an auto-reloading development server (using babel watch) can be used:
+During development an auto-reloading development server (using babel watch) can be used.
+
+Remember to set the environment variables required to configure kube-ldap. E.g.:
 ```bash
-yarn start
+LDAP_URI=ldap://ldap.example.local TLS_ENABLED=false yarn start
 ```
 
 ### Test
