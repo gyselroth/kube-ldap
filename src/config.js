@@ -10,6 +10,17 @@ const parseBooleanFromEnv = (env: ?string, defaultValue: boolean): boolean => {
   return defaultValue;
 };
 
+const parseArrayFromEnv = (
+  env: ?string,
+  delimiter: string,
+  defaultValue: Array<string>
+): Array<string> => {
+  if (env) {
+    return env.split(delimiter);
+  }
+  return defaultValue;
+};
+
 const getConfig = () => {
   let config = {
     loglevel: process.env.LOGLEVEL || 'debug',
@@ -20,6 +31,16 @@ const getConfig = () => {
       baseDn: process.env.LDAP_BASEDN || 'dc=example,dc=com',
       filter: process.env.LDAP_FILTER || '(uid=%s)',
       timeout: parseInt(process.env.LDAP_TIMEOUT) || 0,
+    },
+    mapping: {
+      username: process.env.MAPPING_USERNAME || 'uid',
+      uid: process.env.MAPPING_UID|| 'uid',
+      groups: process.env.MAPPING_GROUPS || 'memberOf',
+      extraFields: parseArrayFromEnv(
+        process.env.MAPPING_EXTRAFIELDS,
+        ',',
+        []
+      ),
     },
     jwt: {
       key: process.env.JWT_KEY || 'secret',

@@ -38,6 +38,29 @@ const fixtures = {
       {value: '30', expected: 30},
     ],
   },
+  'mapping.username': {
+    env: 'MAPPING_USERNAME',
+    default: 'uid',
+    testValues: ['mail'],
+  },
+  'mapping.uid': {
+    env: 'MAPPING_UID',
+    default: 'uid',
+    testValues: ['cn'],
+  },
+  'mapping.groups': {
+    env: 'MAPPING_GROUPS',
+    default: 'memberOf',
+    testValues: ['groups'],
+  },
+  'mapping.extraFields': {
+    env: 'MAPPING_EXTRAFIELDS',
+    default: [],
+    testValues: [
+      {value: 'uidNumber', expected: ['uidNumber']},
+      {value: 'uidNumber,gidNumber', expected: ['uidNumber', 'gidNumber']},
+    ],
+  },
   'jwt.key': {
     env: 'JWT_KEY',
     default: 'secret',
@@ -87,7 +110,7 @@ for (let setting of Object.keys(fixtures)) {
     test('test default value [' + fixtures[setting].default + ']', () => {
       delete process.env[fixtures[setting].env];
       let config = getConfig(); // eslint-disable-line no-unused-vars
-      expect(eval('config.' + setting)).toBe(fixtures[setting].default);
+      expect(eval('config.' + setting)).toEqual(fixtures[setting].default);
     });
     for (let testValue of fixtures[setting].testValues) {
       let value = testValue;
@@ -99,7 +122,7 @@ for (let setting of Object.keys(fixtures)) {
       test('test custom value [' + value + ']', () => {
         process.env[fixtures[setting].env] = value;
         let config = getConfig(); // eslint-disable-line no-unused-vars
-        expect(eval('config.' + setting)).toBe(expected);
+        expect(eval('config.' + setting)).toEqual(expected);
       });
     };
   });
