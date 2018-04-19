@@ -31,6 +31,13 @@ const fixtures = {
     default: '(uid=%s)',
     testValues: ['(mail=%s)'],
   },
+  'ldap.timeout': {
+    env: 'LDAP_TIMEOUT',
+    default: 0,
+    testValues: [
+      {value: '30', expected: 30},
+    ],
+  },
   'jwt.key': {
     env: 'JWT_KEY',
     default: 'secret',

@@ -28,6 +28,8 @@ const logger = new Logger({
 let ldapClient = new Client(
   ldap.createClient({
     url: config.ldap.uri,
+    timeout: config.ldap.timeout,
+    connectTimeout: config.ldap.timeout,
   }),
   config.ldap.baseDn,
   config.ldap.bindDn,
