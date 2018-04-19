@@ -19,6 +19,7 @@ const getConfig = () => {
       bindPw: process.env.LDAP_BINDPW || 'secret',
       baseDn: process.env.LDAP_BASEDN || 'dc=example,dc=com',
       filter: process.env.LDAP_FILTER || '(uid=%s)',
+      timeout: parseInt(process.env.LDAP_TIMEOUT) || 0,
     },
     jwt: {
       key: process.env.JWT_KEY || 'secret',

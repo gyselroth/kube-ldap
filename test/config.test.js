@@ -31,6 +31,13 @@ const fixtures = {
     default: '(uid=%s)',
     testValues: ['(mail=%s)'],
   },
+  'ldap.timeout': {
+    env: 'LDAP_TIMEOUT',
+    default: 0,
+    testValues: [
+      {value: '30', expected: 30},
+    ],
+  },
   'jwt.key': {
     env: 'JWT_KEY',
     default: 'secret',
@@ -48,7 +55,7 @@ const fixtures = {
     default: true,
     testValues: [
       {value: 'false', expected: false},
-      {value: 'abc', expected: true}
+      {value: 'abc', expected: true},
     ],
   },
   'tls.cert': {
@@ -78,11 +85,8 @@ const fixtures = {
 for (let setting of Object.keys(fixtures)) {
   describe('config.' + setting, () => {
     test('test default value [' + fixtures[setting].default + ']', () => {
-      // console.log(setting)
-      // console.log(config)
-      // console.log(config[setting])
       delete process.env[fixtures[setting].env];
-      let config = getConfig();
+      let config = getConfig(); // eslint-disable-line no-unused-vars
       expect(eval('config.' + setting)).toBe(fixtures[setting].default);
     });
     for (let testValue of fixtures[setting].testValues) {
@@ -94,7 +98,7 @@ for (let setting of Object.keys(fixtures)) {
       }
       test('test custom value [' + value + ']', () => {
         process.env[fixtures[setting].env] = value;
-        let config = getConfig();
+        let config = getConfig(); // eslint-disable-line no-unused-vars
         expect(eval('config.' + setting)).toBe(expected);
       });
     };
