@@ -2,7 +2,7 @@ import winston from 'winston';
 import {getResponseMock, getRequestMock} from '../mock';
 import jwt from 'jsonwebtoken';
 import UserAuthentication from '../../src/api/userAuthentication';
-import Authenticator from '../../src/ldap/authenticator';
+import {Authenticator, Mapping} from '../../src/ldap';
 jest.mock('../../src/ldap/authenticator');
 
 const fixtures = {
@@ -14,10 +14,28 @@ const fixtures = {
   groups: [
     'test',
   ],
+  extraFields: {
+    uidNumber: 1,
+    gidNumber: 10,
+  },
+  mapping: new Mapping(
+    'uid',
+    'uid',
+    'memberOf',
+    [
+      'uidNumber',
+      'gidNumber',
+    ]
+  ),
 };
 
 let authenticator = new Authenticator();
-const userAuthentication = new UserAuthentication(authenticator, fixtures.lifetime, fixtures.key, winston);
+const userAuthentication = new UserAuthentication(
+  authenticator,
+  fixtures.lifetime,
+  fixtures.key,
+  fixtures.mapping,
+  winston);
 
 beforeEach(() => {
   authenticator.authenticated = true;
@@ -26,6 +44,8 @@ beforeEach(() => {
     memberOf: fixtures.groups.map((group) => {
       return 'cn=' + group + ',dc=example,dc=com';
     }),
+    uidNumber: fixtures.extraFields.uidNumber,
+    gidNumber: fixtures.extraFields.gidNumber,
   };
   authenticator.getAttributesShouldThrowError = false;
 });
@@ -125,6 +145,7 @@ describe('UserAuthentication.getToken()', () => {
           expect(token.payload.username).toBe(fixtures.username);
           expect(token.payload.uid).toBe(fixtures.username);
           expect(token.payload.groups).toEqual(fixtures.groups);
+          expect(token.payload.extra).toEqual(fixtures.extraFields);
           expect(token.payload.exp / 60).toBeCloseTo((now + fixtures.lifetime) / 60);
           expect(jwt.verify(result, fixtures.key));
     });

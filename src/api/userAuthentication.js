@@ -2,13 +2,14 @@
 import {Logger} from 'winston';
 import atob from 'atob';
 import jwt from 'jsonwebtoken';
-import {Authenticator, canonicalizeDn} from '../ldap';
+import {Authenticator, Mapping} from '../ldap';
 
 /** Class for UserAuthentication API route */
 export default class UserAuthentication {
   authenticator: Authenticator;
   tokenLifetime: number;
   key: string;
+  mapping: Mapping;
   logger: Logger;
   run: (Object, Object) => void
 
@@ -17,17 +18,20 @@ export default class UserAuthentication {
   * @param {Authenticator} authenticator - Authenticator.
   * @param {number} tokenLifetime - Token lifetime.
   * @param {string} key - Private key for token signing.
+  * @param {Mapping} mapping - Attribute mapping (kubernetes<=>ldap).
   * @param {Logger} logger - Logger to use.
   */
   constructor(
     authenticator: Authenticator,
     tokenLifetime: number,
     key: string,
+    mapping: Mapping,
     logger: Logger
   ) {
     this.authenticator = authenticator;
     this.tokenLifetime = tokenLifetime;
     this.key = key;
+    this.mapping = mapping;
     this.logger = logger;
     this.run = this.run.bind(this);
   }
@@ -77,18 +81,12 @@ export default class UserAuthentication {
   */
   async getToken(username: string): Promise<string> {
     try {
-      let user = await this.authenticator.getAttributes(username, [
-        'uid',
-        'memberOf',
-      ]);
+      let user = await this.authenticator.getAttributes(
+        username,
+        this.mapping.getLdapAttributes()
+      );
 
-      let data = {
-        username: username,
-        uid: user.uid,
-        groups: user.memberOf.map((group) => {
-          return canonicalizeDn(group);
-        }),
-      };
+      let data = this.mapping.ldapToKubernetes(user);
       let token = jwt.sign(data, this.key, {
         expiresIn: this.tokenLifetime,
       });

@@ -1,6 +1,7 @@
 // @flow
 import Client from './client';
 import Authenticator from './authenticator';
+import Mapping from './mapping';
 
 let canonicalizeDn = (dn: string) => {
   let firstPart = dn.split(',')[0].split('=');
@@ -13,5 +14,6 @@ let canonicalizeDn = (dn: string) => {
 export {
   Client,
   Authenticator,
+  Mapping,
   canonicalizeDn,
 };

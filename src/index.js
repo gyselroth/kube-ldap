@@ -9,7 +9,7 @@ import morgan from 'morgan';
 import {Logger, transports} from 'winston';
 import ldap from 'ldapjs';
 import {config} from './config';
-import {Client, Authenticator} from './ldap';
+import {Client, Authenticator, Mapping} from './ldap';
 import {Healthz, UserAuthentication, TokenAuthentication} from './api';
 
 // setup logging
@@ -43,6 +43,12 @@ let userAuthentication = new UserAuthentication(
   authenticator,
   config.jwt.tokenLifetime,
   config.jwt.key,
+  new Mapping(
+    config.mapping.username,
+    config.mapping.uid,
+    config.mapping.groups,
+    config.mapping.extraFields,
+  ),
   logger);
 let tokenAuthentication = new TokenAuthentication(config.jwt.key, logger);
 
