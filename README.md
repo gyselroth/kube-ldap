@@ -150,6 +150,7 @@ List of configurable values:
 |`config.ldap.bindpw`|Password of LDAP bind user|`LDAP_BINDPW`|secret|
 |`config.ldap.baseDn`|Base DN for LDAP search|`LDAP_BASEDN`|dc=example,dc=com|
 |`config.ldap.filter`|Filter for LDAP search|`LDAP_FILTER`|(uid=%s)|
+|`config.ldap.timeout`|Timeout for LDAP connections & operations|`LDAP_TIMEOUT`|0 (infinite for operations, OS default for connections)|
 |`config.jwt.key`|Key for signing the JWT. **DO NOT USE THE DEFAULT VALUE IN PRODUCTION**|`JWT_KEY`|secret|
 |`config.jwt.tokenLifetime`|Seconds until token a expires|`JWT_TOKEN_LIFETIME`|28800|
 
