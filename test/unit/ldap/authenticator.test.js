@@ -1,7 +1,7 @@
 import winston from 'winston';
-import Authenticator from '../../src/ldap/authenticator';
-import Client from '../../src/ldap/client';
-jest.mock('../../src/ldap/client');
+import Authenticator from '../../../src/ldap/authenticator';
+import Client from '../../../src/ldap/client';
+jest.mock('../../../src/ldap/client');
 
 const fixtures = {
   username: 'john.doe',

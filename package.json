@@ -29,7 +29,8 @@
     "eslint-config-google": "^0.9.1",
     "eslint-plugin-flowtype": "^2.46.1",
     "flow-bin": "^0.68.0",
-    "jest": "^22.4.3"
+    "jest": "^22.4.3",
+    "supertest": "^3.0.0"
   },
   "scripts": {
     "start": "babel-watch src/index.js",

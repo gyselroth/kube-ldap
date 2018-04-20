@@ -66,9 +66,13 @@ class LdapMock {
   }
 }
 
+let client = null;
 const ldapMock = {
   createClient: () => {
-    return new LdapMock();
+    if (!client) {
+      client = new LdapMock();
+    }
+    return client;
   },
 };
 

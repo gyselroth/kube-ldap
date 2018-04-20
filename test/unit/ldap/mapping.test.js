@@ -1,4 +1,4 @@
-import Mapping from '../../src/ldap/mapping';
+import Mapping from '../../../src/ldap/mapping';
 
 const fixtures = {
   mapping: {
