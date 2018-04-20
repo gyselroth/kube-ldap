@@ -1,4 +1,4 @@
-import {canonicalizeDn} from '../../src/ldap';
+import {canonicalizeDn} from '../../../src/ldap';
 
 const fixtures = {
   validDn1: 'cn=test,dc=example,dc=com',

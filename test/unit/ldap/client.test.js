@@ -1,4 +1,4 @@
-import Client from '../../src/ldap/client';
+import Client from '../../../src/ldap/client';
 import ldap from 'ldapjs';
 jest.mock('ldapjs');
 

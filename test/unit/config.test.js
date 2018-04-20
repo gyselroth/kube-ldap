@@ -1,4 +1,4 @@
-import {getConfig} from '../src/config';
+import {getConfig} from '../../src/config';
 
 const fixtures = {
   'loglevel': {

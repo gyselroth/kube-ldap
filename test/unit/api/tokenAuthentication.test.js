@@ -1,6 +1,6 @@
 import winston from 'winston';
 import {getResponseMock, getRequestMock} from '../mock';
-import TokenAuthentication from '../../src/api/tokenAuthentication';
+import TokenAuthentication from '../../../src/api/tokenAuthentication';
 
 const key = 'testsecret';
 const tokenAuthentication = new TokenAuthentication(key, winston);

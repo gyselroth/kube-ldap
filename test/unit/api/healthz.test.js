@@ -1,4 +1,4 @@
-import Healthz from '../../src/api/healthz';
+import Healthz from '../../../src/api/healthz';
 
 describe('Healthz.run()', () => {
   test('Sends "OK"', () => {

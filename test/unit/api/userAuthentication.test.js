@@ -1,9 +1,9 @@
 import winston from 'winston';
 import {getResponseMock, getRequestMock} from '../mock';
 import jwt from 'jsonwebtoken';
-import UserAuthentication from '../../src/api/userAuthentication';
-import {Authenticator, Mapping} from '../../src/ldap';
-jest.mock('../../src/ldap/authenticator');
+import UserAuthentication from '../../../src/api/userAuthentication';
+import {Authenticator, Mapping} from '../../../src/ldap';
+jest.mock('../../../src/ldap/authenticator');
 
 const fixtures = {
   key: 'testsecret',
