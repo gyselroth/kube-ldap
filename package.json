@@ -1,6 +1,6 @@
 {
   "name": "kube-ldap",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "kubernetes token webhook to check bearer tokens against ldap",
   "main": "src/index.js",
   "author": "Fabian Jucker <jucker@gyselroth.com>",
