@@ -4,6 +4,11 @@ services:
 language: node_js
 node_js:
   - "8"
+script:
+  - yarn install
+  - yarn run build
+  - yarn run test
+  - yarn run coveralls
 cache:
   directories:
     - "node_modules"

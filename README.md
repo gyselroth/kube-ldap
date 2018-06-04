@@ -1,5 +1,6 @@
 # kube-ldap
 [![Build Status](https://travis-ci.org/gyselroth/kube-ldap.svg)](https://travis-ci.org/gyselroth/kube-ldap)
+ [![Coverage Status](https://coveralls.io/repos/github/gyselroth/kube-ldap/badge.svg)](https://coveralls.io/github/gyselroth/kube-ldap)
  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A [Webhook Token Authentication](https://kubernetes.io/docs/admin/authentication/#webhook-token-authentication) plugin for kubernetes,  written in javascript, to use LDAP as authentication source.
