@@ -31,6 +31,9 @@ const getConfig = () => {
       baseDn: process.env.LDAP_BASEDN || 'dc=example,dc=com',
       filter: process.env.LDAP_FILTER || '(uid=%s)',
       timeout: parseInt(process.env.LDAP_TIMEOUT) || 0,
+      reconnectInitialDelay: parseInt(process.env.LDAP_RECONN_INIT_DELAY) || 100,
+      reconnectMaxDelay: parseInt(process.env.LDAP_RECONN_MAX_DELAY) || 1000,
+      reconnectFailAfter: parseInt(process.env.LDAP_RECONN_FAIL_AFTER) || 10,
     },
     mapping: {
       username: process.env.MAPPING_USERNAME || 'uid',
