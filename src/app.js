@@ -16,6 +16,11 @@ let ldapClient = new Client(
     url: config.ldap.uri,
     timeout: config.ldap.timeout * 1000,
     connectTimeout: config.ldap.timeout * 1000,
+    reconnect: {
+      initialDelay: config.ldap.reconnectInitialDelay,
+      maxDelay: config.ldap.reconnectMaxDelay,
+      failAfter: config.ldap.reconnectFailAfter
+    }
   }),
   config.ldap.baseDn,
   config.ldap.bindDn,
