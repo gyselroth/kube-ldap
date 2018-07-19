@@ -18,8 +18,6 @@ It exposes two API endpoints:
 ## Deployment
 The recommended way to deploy kube-ldap is deplyoing kube-ldap in kubernetes itself using the [gyselroth/kube-ldap](https://hub.docker.com/r/gyselroth/kube-ldap/) docker image.
 
-**IMPORTANT:** kube-ldap currently works with plain HTTP. Transport of user credentials should be protected by some means transport encryption (like TLS/SSL). Therefore is highly recommended to use kube-ldap behind a TLS-protected reverse proxy only (like nginx).
-
 Example YAML for kubernetes (secrets, deployment including tls termination and service):
 ```yaml
 apiVersion: v1
