@@ -20,6 +20,7 @@ let connection = ldap.createClient();
 let client = new Client(connection);
 
 beforeEach(() => {
+  client._secure = true;
   connection.starttlsReturnsError = false;
   connection.bindReturnsError = false;
   connection.searchReturnsError = false;
@@ -47,6 +48,17 @@ describe('Client.bind()', () => {
     return expect(
       client.bind(fixtures.dn, fixtures.password)
     ).resolves.toBe(false);
+  });
+
+  test('Rejects on unprotected connection', () => {
+    client._secure = false;
+
+    expect.hasAssertions();
+    return expect(
+      client.bind(fixtures.dn, fixtures.password)
+    ).rejects.toEqual(new Error(
+      'ldap connection not tls protected'
+    ));
   });
 });
 
@@ -97,5 +109,16 @@ describe('Client.search()', () => {
     return expect(
       client.search(fixtures.filter)
     ).rejects.toBe(connection.searchEmitsEndStatus);
+  });
+
+  test('Rejects on unprotected connection', () => {
+    client._secure = false;
+
+    expect.hasAssertions();
+    return expect(
+      client.search(fixtures.filter)
+    ).rejects.toEqual(new Error(
+      'ldap connection not tls protected'
+    ));
   });
 });

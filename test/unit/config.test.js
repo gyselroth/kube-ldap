@@ -78,6 +78,7 @@ const fixtures = {
     default: true,
     testValues: [
       {value: 'false', expected: false},
+      {value: 'true', expected: true},
       {value: 'abc', expected: true},
     ],
   },
