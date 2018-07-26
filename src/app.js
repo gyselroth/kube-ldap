@@ -19,8 +19,8 @@ let ldapClient = new Client(
     reconnect: {
       initialDelay: config.ldap.reconnectInitialDelay,
       maxDelay: config.ldap.reconnectMaxDelay,
-      failAfter: config.ldap.reconnectFailAfter
-    }
+      failAfter: config.ldap.reconnectFailAfter,
+    },
   }),
   config.ldap.baseDn,
   config.ldap.bindDn,
