@@ -4,6 +4,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import morgan from 'morgan';
+import bunyanWinstonAdapter from 'bunyan-winston-adapter';
 import ldap from 'ldapjs';
 import {config} from './config';
 import logger from './logger';
@@ -21,6 +22,7 @@ let ldapClient = new Client(
       maxDelay: config.ldap.reconnectMaxDelay,
       failAfter: config.ldap.reconnectFailAfter,
     },
+    log: bunyanWinstonAdapter.createAdapter(logger),
   }),
   config.ldap.baseDn,
   config.ldap.bindDn,
