@@ -23,12 +23,30 @@ const fixtures = {
     uidNumber: 1,
     gidNumber: [10, 11],
   },
+  ldapObjectWithSingleGroup: {
+    mail: 'john.doe@example.com',
+    cn: 'john.doe',
+    memberOf: 'cn=kubernetes,ou=groups,dc=example,dc=com',
+    uidNumber: 1,
+    gidNumber: [10, 11],
+  },
   kubernetesObject: {
     username: 'john.doe@example.com',
     uid: 'john.doe',
     groups: [
       'kubernetes',
       'user',
+    ],
+    extra: {
+      'uidNumber': 1,
+      'gidNumber': [10, 11],
+    },
+  },
+  kubernetesObjectWithSingleGroup: {
+    username: 'john.doe@example.com',
+    uid: 'john.doe',
+    groups: [
+      'kubernetes',
     ],
     extra: {
       'uidNumber': 1,
@@ -75,5 +93,18 @@ describe('Mapping.ldapToKubernetes()', () => {
     expect(
       mapping.ldapToKubernetes(fixtures.ldapObject)
     ).toEqual(fixtures.kubernetesObject);
+  });
+
+  test('handles when groups attribute is a single object', () => {
+    let mapping = new Mapping(
+      fixtures.mapping.username,
+      fixtures.mapping.uid,
+      fixtures.mapping.groups,
+      fixtures.mapping.extraFields
+    );
+
+    expect(
+      mapping.ldapToKubernetes(fixtures.ldapObjectWithSingleGroup)
+    ).toEqual(fixtures.kubernetesObjectWithSingleGroup);
   });
 });
