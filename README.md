@@ -150,8 +150,8 @@ List of configurable values:
 |`config.ldap.baseDn`|Base DN for LDAP search|`LDAP_BASEDN`|dc=example,dc=com|
 |`config.ldap.filter`|Filter for LDAP search|`LDAP_FILTER`|(uid=%s)|
 |`config.ldap.timeout`|Timeout for LDAP connections & operations (in seconds)|`LDAP_TIMEOUT`|0 (infinite for operations, OS default for connections)|
-|`config.ldap.reconnectInitialDelay`|Seconds to wait before reconnecting|`LDAP_RECONN_INIT_DELAY`|100|
-|`config.ldap.reconnectMaxDelay`|Maximum seconds to wait before reconnecting|`LDAP_RECONN_MAX_DELAY`|1000|
+|`config.ldap.reconnectInitialDelay`|Milliseconds to wait before reconnecting|`LDAP_RECONN_INIT_DELAY`|100|
+|`config.ldap.reconnectMaxDelay`|Maximum milliseconds to wait before reconnecting|`LDAP_RECONN_MAX_DELAY`|1000|
 |`config.ldap.reconnectFailAfter`|Fail after number of retries|`LDAP_RECONN_FAIL_AFTER`|10|
 |`config.mapping.username`|Name of ldap attribute to be used as username in kubernetes TokenReview|`MAPPING_USERNAME`|uid|
 |`config.mapping.uid`|Name of ldap attribute to be used as uid in kubernetes TokenReview|`MAPPING_UID`|uid|
