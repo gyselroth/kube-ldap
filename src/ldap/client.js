@@ -17,11 +17,13 @@ export default class Client {
   constructor(conn: Object, basedn: string, binddn: string, bindpw: string) {
     this.client = conn;
     this._secure = false;
-    this.client.starttls({}, [], (err, res) => {
-      if (err) {
-        throw err;
-      }
-      this._secure = true;
+    this.client.on('connect', () => {
+      this.client.starttls({}, [], (err, res) => {
+        if (err) {
+          throw err;
+        }
+        this._secure = true;
+      });
     });
     this.basedn = basedn;
     this.binddn = binddn;
@@ -42,8 +44,9 @@ export default class Client {
       this.client.bind(dn, password, [], (err, res) => {
         if (err) {
           resolve(false);
+        } else {
+          resolve(true);
         }
-        resolve(true);
       });
     });
   }
@@ -72,31 +75,37 @@ export default class Client {
       this.client.bind(this.binddn, this.bindpw, [], (err, res) => {
         if (err) {
           reject(err);
-        }
-
-        let options = {
-          filter: filter,
-          scope: 'sub',
-          attributes: attributes,
-        };
-        that.client.search(basedn, options, [], (err, res) => {
-          if (err) {
-            reject(err);
-          }
-
-          res.on('searchEntry', function(entry) {
-            resolve(entry.object);
-          });
-          res.on('error', function(err) {
-            reject(err);
-          });
-          res.on('end', function(result) {
-            if (result.status !== 0) {
-              reject(result.status);
+        } else {
+          let options = {
+            filter: filter,
+            scope: 'sub',
+            attributes: attributes,
+          };
+          that.client.search(basedn, options, [], (err, res) => {
+            let searchResult = null;
+            if (err) {
+              reject(err);
+            } else {
+              res.on('searchEntry', function(entry) {
+                searchResult = entry.object;
+              });
+              res.on('error', function(err) {
+                reject(err);
+              });
+              res.on('end', function(result) {
+                if (result.status !== 0) {
+                  reject(result.status);
+                } else {
+                  if (searchResult) {
+                    resolve(searchResult);
+                  } else {
+                    reject(new Error(`no object found with filter [${filter}]`));
+                  }
+                }
+              });
             }
-            reject(new Error(`no object found with filter [${filter}]`));
           });
-        });
+        }
       });
     });
   }
