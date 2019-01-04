@@ -8,13 +8,14 @@ class LdapMock {
   bindReturnsError: boolean;
   searchReturnsError: boolean;
   searchEmitsError: boolean;
-  searchEmitsEnd: boolean;
+  searchEmitsResult: boolean;
   searchEmitsEndStatus: number;
   searchResult: Object;
   emitter: EventEmitter;
   starttls: (string, Array<string>) => Promise<Object>;
   bind: (string, Array<string>) => Promise<Object>;
   search: (string, Array<string>) => Promise<Object>;
+  on: (string, (any) => any) => void;
 
   /** creates the mock */
   constructor() {
@@ -22,7 +23,7 @@ class LdapMock {
     this.bindReturnsError = false;
     this.searchReturnsError = false;
     this.searchEmitsError = false;
-    this.searchEmitsEnd = false;
+    this.searchEmitsResult = true;
     this.searchEmitsEndStatus = 0;
     this.searchResult = {};
     this.emitter = new EventEmitter();
@@ -48,20 +49,25 @@ class LdapMock {
         callback(new Error('error by mock'));
       } else {
         setTimeout(() => {
-          if (this.searchEmitsEnd) {
-            this.emitter.emit('end', {
-              status: this.searchEmitsEndStatus,
-            });
-          } else if (this.searchEmitsError) {
+          if (this.searchEmitsError) {
             this.emitter.emit('error', new Error('error by mock'));
           } else {
-            this.emitter.emit('searchEntry', {
-              object: this.searchResult,
+            if (this.searchEmitsResult) {
+              this.emitter.emit('searchEntry', {
+                object: this.searchResult,
+              });
+            }
+            this.emitter.emit('end', {
+              status: this.searchEmitsEndStatus,
             });
           }
         }, 100);
         callback(null, this.emitter);
       }
+    });
+    this.on = jest.fn();
+    this.on.mockImplementation((event, callback) => {
+      callback();
     });
   }
 }
