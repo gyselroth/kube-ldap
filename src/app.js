@@ -26,7 +26,8 @@ let ldapClient = new Client(
   }),
   config.ldap.baseDn,
   config.ldap.bindDn,
-  config.ldap.bindPw
+  config.ldap.bindPw,
+  config.ldap.startTls,
 );
 let authenticator = new Authenticator(ldapClient, config.ldap.filter, logger);
 
