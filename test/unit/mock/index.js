@@ -2,6 +2,7 @@ const getResponseMock = () => {
   return {
     send: jest.fn(),
     sendStatus: jest.fn(),
+    set: jest.fn(),
   };
 };
 

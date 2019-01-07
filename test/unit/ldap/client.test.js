@@ -3,6 +3,9 @@ import ldap from 'ldapjs';
 jest.mock('ldapjs');
 
 const fixtures = {
+  basedn: 'dc=example,dc=com',
+  binddn: 'uid=bind,dc=example,dc=com',
+  bindpw: 'secret',
   username: 'john.doe',
   dn: 'uid=john.doe,dc=example,dc=com',
   password: 'secret',
@@ -17,14 +20,21 @@ const fixtures = {
 };
 
 let connection = ldap.createClient();
-let client = new Client(connection);
+let client = null;
 
 beforeEach(() => {
+  client = new Client(
+    connection,
+    fixtures.basedn,
+    fixtures.binddn,
+    fixtures.bindpw,
+    true
+  );
   connection.starttlsReturnsError = false;
   connection.bindReturnsError = false;
   connection.searchReturnsError = false;
   connection.searchEmitsError = false;
-  connection.searchEmitsEnd = false;
+  connection.searchEmitsResult = true;
   connection.searchEmitsEndStatus = 0;
   connection.searchResult = {
     uid: fixtures.username,
@@ -47,6 +57,17 @@ describe('Client.bind()', () => {
     return expect(
       client.bind(fixtures.dn, fixtures.password)
     ).resolves.toBe(false);
+  });
+
+  test('Rejects on unprotected connection', () => {
+    client._secure = false;
+
+    expect.hasAssertions();
+    return expect(
+      client.bind(fixtures.dn, fixtures.password)
+    ).rejects.toEqual(new Error(
+      'ldap connection not tls protected'
+    ));
   });
 });
 
@@ -79,7 +100,7 @@ describe('Client.search()', () => {
   });
 
   test('Rejects on empty result', () => {
-    connection.searchEmitsEnd = true;
+    connection.searchEmitsResult = false;
 
     expect.hasAssertions();
     return expect(
@@ -97,5 +118,16 @@ describe('Client.search()', () => {
     return expect(
       client.search(fixtures.filter)
     ).rejects.toBe(connection.searchEmitsEndStatus);
+  });
+
+  test('Rejects on unprotected connection', () => {
+    client._secure = false;
+
+    expect.hasAssertions();
+    return expect(
+      client.search(fixtures.filter)
+    ).rejects.toEqual(new Error(
+      'ldap connection not tls protected'
+    ));
   });
 });

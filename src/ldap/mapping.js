@@ -45,7 +45,7 @@ class Mapping {
     let object = {
       username: ldapObject[this.username],
       uid: ldapObject[this.uid],
-      groups: ldapObject[this.groups].map((group) => {
+      groups: this.getGroups(ldapObject).map((group) => {
         return canonicalizeDn(group);
       }),
       extra: {},
@@ -54,6 +54,20 @@ class Mapping {
       object.extra[extraField] = ldapObject[extraField];
     }
     return object;
+  }
+
+  /**
+  * Get group of LDAP object
+  * @param {Object} ldapObject - Ldap object to convert
+  * @return {Array}
+  */
+  getGroups(ldapObject: Object): Array<string> {
+    let groups = ldapObject[this.groups];
+    if (groups instanceof Array) {
+      return groups;
+    } else {
+      return [groups];
+    }
   }
 }
 

@@ -79,6 +79,9 @@ describe('UserAuthentication.run()', () => {
 
     expect.hasAssertions();
     return userAuthentication.run(requestMock, responseMock).then(() => {
+      expect(responseMock.set).toHaveBeenCalled();
+      expect(responseMock.set.mock.calls[0][0])
+        .toEqual('WWW-Authenticate', 'Basic realm="kubernetes"');
       expect(responseMock.sendStatus).toHaveBeenCalled();
       expect(responseMock.sendStatus.mock.calls[0][0])
         .toEqual(401);
@@ -90,7 +93,9 @@ describe('UserAuthentication.run()', () => {
     const responseMock = getResponseMock();
 
     userAuthentication.run(requestMock, responseMock);
-
+    expect(responseMock.set).toHaveBeenCalled();
+    expect(responseMock.set.mock.calls[0][0])
+      .toEqual('WWW-Authenticate', 'Basic realm="kubernetes"');
     expect(responseMock.sendStatus).toHaveBeenCalled();
     expect(responseMock.sendStatus.mock.calls[0][0])
       .toEqual(401);

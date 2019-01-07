@@ -5,6 +5,7 @@ export default class Client {
   basedn: string;
   binddn: string;
   bindpw: string;
+  startTls: boolean;
   _secure: boolean;
 
   /**
@@ -12,17 +13,23 @@ export default class Client {
   * @param {Object} conn - Ldap connection.
   * @param {string} basedn - The base DN to use.
   * @param {string} binddn - DN of the bind user to use.
-  * @param {string} bindpw - Password of the bind user to use .
+  * @param {string} bindpw - Password of the bind user to use.
+  * @param {boolean} startTls - Whether to use StartTLS on the connection or not.
   */
-  constructor(conn: Object, basedn: string, binddn: string, bindpw: string) {
+  constructor(conn: Object, basedn: string, binddn: string, bindpw: string, startTls: boolean) {
     this.client = conn;
+    this.startTls = startTls;
     this._secure = false;
-    this.client.starttls({}, [], (err, res) => {
-      if (err) {
-        throw err;
-      }
-      this._secure = true;
-    });
+    if (this.startTls) {
+      this.client.on('connect', () => {
+        this.client.starttls({}, [], (err, res) => {
+          if (err) {
+            throw err;
+          }
+          this._secure = true;
+        });
+      });
+    }
     this.basedn = basedn;
     this.binddn = binddn;
     this.bindpw = bindpw;
@@ -36,14 +43,15 @@ export default class Client {
   */
   bind(dn: string, password: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      if (!this._secure) {
+      if (this.startTls && !this._secure) {
         reject(new Error('ldap connection not tls protected'));
       }
       this.client.bind(dn, password, [], (err, res) => {
         if (err) {
           resolve(false);
+        } else {
+          resolve(true);
         }
-        resolve(true);
       });
     });
   }
@@ -65,38 +73,44 @@ export default class Client {
     }
 
     return new Promise((resolve, reject) => {
-      if (!this._secure) {
+      if (this.startTls && !this._secure) {
         reject(new Error('ldap connection not tls protected'));
       }
       let that = this;
       this.client.bind(this.binddn, this.bindpw, [], (err, res) => {
         if (err) {
           reject(err);
-        }
-
-        let options = {
-          filter: filter,
-          scope: 'sub',
-          attributes: attributes,
-        };
-        that.client.search(basedn, options, [], (err, res) => {
-          if (err) {
-            reject(err);
-          }
-
-          res.on('searchEntry', function(entry) {
-            resolve(entry.object);
-          });
-          res.on('error', function(err) {
-            reject(err);
-          });
-          res.on('end', function(result) {
-            if (result.status !== 0) {
-              reject(result.status);
+        } else {
+          let options = {
+            filter: filter,
+            scope: 'sub',
+            attributes: attributes,
+          };
+          that.client.search(basedn, options, [], (err, res) => {
+            let searchResult = null;
+            if (err) {
+              reject(err);
+            } else {
+              res.on('searchEntry', function(entry) {
+                searchResult = entry.object;
+              });
+              res.on('error', function(err) {
+                reject(err);
+              });
+              res.on('end', function(result) {
+                if (result.status !== 0) {
+                  reject(result.status);
+                } else {
+                  if (searchResult) {
+                    resolve(searchResult);
+                  } else {
+                    reject(new Error(`no object found with filter [${filter}]`));
+                  }
+                }
+              });
             }
-            reject(new Error(`no object found with filter [${filter}]`));
           });
-        });
+        }
       });
     });
   }

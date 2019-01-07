@@ -45,7 +45,7 @@ export default class UserAuthentication {
   run(req: Object, res: Object) {
     let authHeader = req.get('Authorization');
     if (!authHeader) {
-      res.sendStatus(401);
+      this._sendUnauthorized(res);
     } else {
       try {
         let credentials = UserAuthentication.parseBasicAuthHeader(authHeader);
@@ -54,7 +54,7 @@ export default class UserAuthentication {
           credentials.password
         ).then((success) => {
           if (!success) {
-            res.sendStatus(401);
+            this._sendUnauthorized(res);
           } else {
             return this.getToken(credentials.username).then((token) => {
               res.send(token);
@@ -72,6 +72,15 @@ export default class UserAuthentication {
         res.sendStatus(400);
       }
     }
+  }
+
+  /**
+  * Send an HTTP 401 (Unauthorized) response including a WWW-Authenticate header
+  * @param {Object} res - Response.
+  */
+  _sendUnauthorized(res: Object): void {
+    res.set('WWW-Authenticate', 'Basic realm="kubernetes"');
+    res.sendStatus(401);
   }
 
   /**

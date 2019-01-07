@@ -3,8 +3,8 @@ import {getConfig} from '../../src/config';
 const fixtures = {
   'loglevel': {
     env: 'LOGLEVEL',
-    default: 'debug',
-    testValues: ['info'],
+    default: 'info',
+    testValues: ['debug'],
   },
   'ldap.uri': {
     env: 'LDAP_URI',
@@ -78,6 +78,7 @@ const fixtures = {
     default: true,
     testValues: [
       {value: 'false', expected: false},
+      {value: 'true', expected: true},
       {value: 'abc', expected: true},
     ],
   },

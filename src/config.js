@@ -23,7 +23,7 @@ const parseArrayFromEnv = (
 
 const getConfig = () => {
   let config = {
-    loglevel: process.env.LOGLEVEL || 'debug',
+    loglevel: process.env.LOGLEVEL || 'info',
     ldap: {
       uri: process.env.LDAP_URI || 'ldap://ldap.example.com',
       bindDn: process.env.LDAP_BINDDN || 'uid=bind,dc=example,dc=com',
@@ -34,6 +34,7 @@ const getConfig = () => {
       reconnectInitialDelay: parseInt(process.env.LDAP_RECONN_INIT_DELAY) || 100,
       reconnectMaxDelay: parseInt(process.env.LDAP_RECONN_MAX_DELAY) || 1000,
       reconnectFailAfter: parseInt(process.env.LDAP_RECONN_FAIL_AFTER) || 10,
+      startTls: parseBooleanFromEnv(process.env.LDAP_STARTTLS, true),
     },
     mapping: {
       username: process.env.MAPPING_USERNAME || 'uid',

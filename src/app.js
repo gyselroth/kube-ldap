@@ -4,6 +4,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import morgan from 'morgan';
+import bunyanWinstonAdapter from 'bunyan-winston-adapter';
 import ldap from 'ldapjs';
 import {config} from './config';
 import logger from './logger';
@@ -19,12 +20,14 @@ let ldapClient = new Client(
     reconnect: {
       initialDelay: config.ldap.reconnectInitialDelay,
       maxDelay: config.ldap.reconnectMaxDelay,
-      failAfter: config.ldap.reconnectFailAfter
-    }
+      failAfter: config.ldap.reconnectFailAfter,
+    },
+    log: bunyanWinstonAdapter.createAdapter(logger),
   }),
   config.ldap.baseDn,
   config.ldap.bindDn,
-  config.ldap.bindPw
+  config.ldap.bindPw,
+  config.ldap.startTls,
 );
 let authenticator = new Authenticator(ldapClient, config.ldap.filter, logger);
 
