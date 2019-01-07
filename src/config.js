@@ -23,7 +23,7 @@ const parseArrayFromEnv = (
 
 const getConfig = () => {
   let config = {
-    loglevel: process.env.LOGLEVEL || 'debug',
+    loglevel: process.env.LOGLEVEL || 'info',
     ldap: {
       uri: process.env.LDAP_URI || 'ldap://ldap.example.com',
       bindDn: process.env.LDAP_BINDDN || 'uid=bind,dc=example,dc=com',

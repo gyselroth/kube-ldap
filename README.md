@@ -139,7 +139,7 @@ List of configurable values:
 |Setting|Description|Environment Variable| Default Value|
 |-------|-----------|--------------------|--------------|
 |`config.port`|HTTP port to listen|`PORT`|8081 (8080 if TLS is disabled)|
-|`config.loglevel`|Loglevel for winston logger|`LOGLEVEL`|debug|
+|`config.loglevel`|Loglevel for winston logger. **CAUTION: debug loglevel may log sensitive parameters like user passwords**|`LOGLEVEL`|info|
 |`config.tls.enabled`|Enable TLS (HTTPS). **DO NOT DISABLE IN PRODUCTION UNLESS YOU HAVE A TLS REVERSE PROXY IN PLACE**|`TLS_ENABLED` ("true" or "false")|true|
 |`config.tls.cert`|Path to certificate (pem) to use for TLS (HTTPS)|`TLS_CERT_PATH`|/etc/ssl/kube-ldap/cert.pem|
 |`config.tls.key`|Path to private key (pem) to use for TLS (HTTPS)|`TLS_KEY_PATH`|/etc/ssl/kube-ldap/key.pem|
