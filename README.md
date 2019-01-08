@@ -153,6 +153,7 @@ List of configurable values:
 |`config.ldap.reconnectInitialDelay`|Milliseconds to wait before reconnecting|`LDAP_RECONN_INIT_DELAY`|100|
 |`config.ldap.reconnectMaxDelay`|Maximum milliseconds to wait before reconnecting|`LDAP_RECONN_MAX_DELAY`|1000|
 |`config.ldap.reconnectFailAfter`|Fail after number of retries|`LDAP_RECONN_FAIL_AFTER`|10|
+|`config.ldap.startTls`|Whether to use StartTLS for the LDAP connection or not|`LDAP_STARTTLS`|true|
 |`config.mapping.username`|Name of ldap attribute to be used as username in kubernetes TokenReview|`MAPPING_USERNAME`|uid|
 |`config.mapping.uid`|Name of ldap attribute to be used as uid in kubernetes TokenReview|`MAPPING_UID`|uid|
 |`config.mapping.groups`|Name of ldap attribute to be used for groups in kubernetes TokenReview|`MAPPING_GROUPS`|memberOf|
