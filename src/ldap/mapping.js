@@ -66,7 +66,7 @@ class Mapping {
     if (groups instanceof Array) {
       return groups;
     } else {
-      return [groups];
+      return groups ? [groups] : [];
     }
   }
 }

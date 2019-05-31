@@ -1,6 +1,5 @@
 import Client from '../../../src/ldap/client';
-import ldap from 'ldapjs';
-jest.mock('ldapjs');
+import {Client as Connection} from 'ldapts';
 
 const fixtures = {
   basedn: 'dc=example,dc=com',
@@ -19,7 +18,7 @@ const fixtures = {
   ],
 };
 
-let connection = ldap.createClient();
+let connection = new Connection();
 let client = null;
 
 beforeEach(() => {
@@ -58,17 +57,6 @@ describe('Client.bind()', () => {
       client.bind(fixtures.dn, fixtures.password)
     ).resolves.toBe(false);
   });
-
-  test('Rejects on unprotected connection', () => {
-    client._secure = false;
-
-    expect.hasAssertions();
-    return expect(
-      client.bind(fixtures.dn, fixtures.password)
-    ).rejects.toEqual(new Error(
-      'ldap connection not tls protected'
-    ));
-  });
 });
 
 describe('Client.search()', () => {
@@ -90,44 +78,14 @@ describe('Client.search()', () => {
     ).rejects.toEqual(new Error('error by mock'));
   });
 
-  test('Rejects on error event', () => {
-    connection.searchEmitsError = true;
-
-    expect.hasAssertions();
-    return expect(
-      client.search(fixtures.filter)
-    ).rejects.toEqual(new Error('error by mock'));
-  });
-
   test('Rejects on empty result', () => {
-    connection.searchEmitsResult = false;
+    connection.searchReturnsResult = false;
 
     expect.hasAssertions();
     return expect(
       client.search(fixtures.filter)
     ).rejects.toEqual(new Error(
       `no object found with filter [${fixtures.filter}]`
-    ));
-  });
-
-  test('Rejects on search end with status != 0', () => {
-    connection.searchEmitsEnd = true;
-    connection.searchEmitsEndStatus = 1;
-
-    expect.hasAssertions();
-    return expect(
-      client.search(fixtures.filter)
-    ).rejects.toBe(connection.searchEmitsEndStatus);
-  });
-
-  test('Rejects on unprotected connection', () => {
-    client._secure = false;
-
-    expect.hasAssertions();
-    return expect(
-      client.search(fixtures.filter)
-    ).rejects.toEqual(new Error(
-      'ldap connection not tls protected'
     ));
   });
 });

@@ -4,8 +4,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import morgan from 'morgan';
-import bunyanWinstonAdapter from 'bunyan-winston-adapter';
-import ldap from 'ldapjs';
+import {Client as Connection} from 'ldapts';
 import {config} from './config';
 import logger from './logger';
 import {Client, Authenticator, Mapping} from './ldap';
@@ -13,21 +12,14 @@ import {Healthz, UserAuthentication, TokenAuthentication} from './api';
 
 // setup basic dependencies
 let ldapClient = new Client(
-  ldap.createClient({
+  new Connection({
     url: config.ldap.uri,
     timeout: config.ldap.timeout * 1000,
     connectTimeout: config.ldap.timeout * 1000,
-    reconnect: {
-      initialDelay: config.ldap.reconnectInitialDelay,
-      maxDelay: config.ldap.reconnectMaxDelay,
-      failAfter: config.ldap.reconnectFailAfter,
-    },
-    log: bunyanWinstonAdapter.createAdapter(logger),
   }),
   config.ldap.baseDn,
   config.ldap.bindDn,
   config.ldap.bindPw,
-  config.ldap.startTls,
 );
 let authenticator = new Authenticator(ldapClient, config.ldap.filter, logger);
 

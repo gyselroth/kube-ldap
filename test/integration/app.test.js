@@ -1,5 +1,4 @@
-import ldap from 'ldapjs';
-jest.mock('ldapjs');
+import {Client as Connection} from 'ldapts';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import {config} from '../../src/config';
@@ -30,16 +29,12 @@ const fixtures = {
   },
 };
 
-let connection = ldap.createClient();
+let connection = new Connection();
 
 describe('test app routes', () => {
   beforeEach(() => {
-    connection.starttlsReturnsError = false;
     connection.bindReturnsError = false;
     connection.searchReturnsError = false;
-    connection.searchEmitsError = false;
-    connection.searchEmitsEnd = false;
-    connection.searchEmitsEndStatus = 0;
     connection.searchResult = {
       uid: fixtures.ldap.username,
       memberOf: fixtures.ldap.memberOf,
@@ -100,16 +95,6 @@ describe('test app routes', () => {
       .get('/auth')
       .auth('john.doe', 'secret')
       .expect(401)
-      .end((error) => {
-        done(error);
-      });
-  });
-  test('GET /auth: 500 Internal Server Error', (done) => {
-    connection.searchResult.memberOf = null;
-    request(app)
-      .get('/auth')
-      .auth('john.doe', 'secret')
-      .expect(500)
       .end((error) => {
         done(error);
       });
