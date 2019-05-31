@@ -30,6 +30,12 @@ const fixtures = {
     uidNumber: 1,
     gidNumber: [10, 11],
   },
+  ldapObjectWithoutGroup: {
+    mail: 'john.doe@example.com',
+    cn: 'john.doe',
+    uidNumber: 1,
+    gidNumber: [10, 11],
+  },
   kubernetesObject: {
     username: 'john.doe@example.com',
     uid: 'john.doe',
@@ -48,6 +54,15 @@ const fixtures = {
     groups: [
       'kubernetes',
     ],
+    extra: {
+      'uidNumber': 1,
+      'gidNumber': [10, 11],
+    },
+  },
+  kubernetesObjectWithoutGroup: {
+    username: 'john.doe@example.com',
+    uid: 'john.doe',
+    groups: [],
     extra: {
       'uidNumber': 1,
       'gidNumber': [10, 11],
@@ -93,6 +108,19 @@ describe('Mapping.ldapToKubernetes()', () => {
     expect(
       mapping.ldapToKubernetes(fixtures.ldapObject)
     ).toEqual(fixtures.kubernetesObject);
+  });
+
+  test('handles when groups attribute is undefined', () => {
+    let mapping = new Mapping(
+      fixtures.mapping.username,
+      fixtures.mapping.uid,
+      fixtures.mapping.groups,
+      fixtures.mapping.extraFields
+    );
+
+    expect(
+      mapping.ldapToKubernetes(fixtures.ldapObjectWithoutGroup)
+    ).toEqual(fixtures.kubernetesObjectWithoutGroup);
   });
 
   test('handles when groups attribute is a single object', () => {
