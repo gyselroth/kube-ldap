@@ -56,5 +56,9 @@ app.use(morgan('combined', {
 app.get('/healthz', healthz.run);
 app.get('/auth', userAuthentication.run);
 app.post('/token', bodyParser.json(), tokenAuthentication.run);
+app.use((err, req, res, next) => {
+  logger.error(err);
+  res.sendStatus(500);
+});
 
 export default app;
