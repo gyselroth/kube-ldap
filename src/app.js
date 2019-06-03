@@ -29,14 +29,19 @@ let userAuthentication = new UserAuthentication(
   authenticator,
   config.jwt.tokenLifetime,
   config.jwt.key,
+  logger,
+);
+let tokenAuthentication = new TokenAuthentication(
+  authenticator,
   new Mapping(
     config.mapping.username,
     config.mapping.uid,
     config.mapping.groups,
     config.mapping.extraFields,
   ),
-  logger);
-let tokenAuthentication = new TokenAuthentication(config.jwt.key, logger);
+  config.jwt.key,
+  logger
+);
 
 // setup express
 const app = express();

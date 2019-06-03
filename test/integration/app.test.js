@@ -11,14 +11,18 @@ const fixtures = {
       'cn=test,dc=example,dc=com',
     ],
   },
-  tokenPayload: {
+  tokenReviewPayload: {
+    username: 'john.doe',
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000 + 3600),
+  },
+  tokenReviewResponse: {
     username: 'john.doe',
     uid: 'john.doe',
     groups: [
       'test',
     ],
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000 + 3600),
+    extra: {},
   },
   tokenReviewTemplate: {
     apiVersion: 'authentication.k8s.io/v1beta1',
@@ -64,9 +68,7 @@ describe('test app routes', () => {
       })
       .expect((response) => {
         let object = jwt.decode(response.text);
-        expect(object.username).toBe(fixtures.tokenPayload.username);
-        expect(object.uid).toBe(fixtures.tokenPayload.uid);
-        expect(object.groups).toEqual(fixtures.tokenPayload.groups);
+        expect(object.username).toBe(fixtures.tokenReviewPayload.username);
       })
       .end((error) => {
         done(error);
@@ -101,7 +103,7 @@ describe('test app routes', () => {
   });
   test('POST /token: 200 OK', (done) => {
     let tokenReview = fixtures.tokenReviewTemplate;
-    tokenReview.spec.token = jwt.sign(fixtures.tokenPayload, config.jwt.key);
+    tokenReview.spec.token = jwt.sign(fixtures.tokenReviewPayload, config.jwt.key);
     request(app)
       .post('/token')
       .send(tokenReview)
@@ -111,7 +113,7 @@ describe('test app routes', () => {
         expect(object.apiVersion).toBe(fixtures.tokenReviewTemplate.apiVersion);
         expect(object.kind).toBe(fixtures.tokenReviewTemplate.kind);
         expect(object.status.authenticated).toBe(true);
-        expect(object.status.user).toEqual(fixtures.tokenPayload);
+        expect(object.status.user).toEqual(fixtures.tokenReviewResponse);
       })
       .end((error) => {
         done(error);
