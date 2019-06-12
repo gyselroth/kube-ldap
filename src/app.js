@@ -7,7 +7,7 @@ import morgan from 'morgan';
 import basicAuth from 'express-basic-auth';
 import prometheusBundle from 'express-prom-bundle';
 import {Client as Connection} from 'ldapts';
-import {config} from './config';
+import {config, getConfig} from './config';
 import logger from './logger';
 import {Client, Authenticator, Mapping} from './ldap';
 import {Healthz, UserAuthentication, TokenAuthentication} from './api';
@@ -55,6 +55,21 @@ let prometheusExporter = prometheusBundle({
     },
   },
 });
+let prometheusBasicAuth = (req, res, next) => {
+  let config = getConfig();
+  if (
+    Boolean(config.prometheus.username) &&
+    Boolean(config.prometheus.password)
+  ) {
+    basicAuth({
+      users: {
+        [config.prometheus.username]: config.prometheus.password,
+      },
+    })(req, res, next);
+  } else {
+    next();
+  }
+};
 
 // setup express
 const app = express();
@@ -66,16 +81,7 @@ app.use(morgan('combined', {
     },
   },
 }));
-if (
-  Boolean(config.prometheus.username) &&
-  Boolean(config.prometheus.password)
-) {
-  app.use('/metrics', basicAuth({
-    users: {
-      [config.prometheus.username]: config.prometheus.password,
-    },
-  }));
-};
+app.use('/metrics', prometheusBasicAuth);
 app.use(prometheusExporter);
 app.get('/healthz', healthz.run);
 app.get('/auth', userAuthentication.run);
