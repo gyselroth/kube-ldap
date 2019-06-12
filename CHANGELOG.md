@@ -9,15 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prometheus exporter on route "/metrics" (basic auth protected)
 
 ### Changed
-- *BREAKING*: Extra-Attributes and groups are now no longer included in the JWT issued after user authentication. Extra-Attributes and group memberships are now resolved during the token review and are included in the token review response
+- **BREAKING:** Extra-Attributes and groups are now no longer included in the JWT issued after user authentication. Extra-Attributes and group memberships are now resolved during the token review and are included in the token review response
 - Internal: Use [ldapts](https://github.com/ldapts/ldapts) instead of [ldapjs](https://github.com/joyent/node-ldapjs) as ldap library
 
 ### Fixed
 - Fix membership resolution for ldap objects without any membership
 
 ### Removed
-- *BREAKING:* LDAP StartTLS is no longer supported
-- *BREAKING:* LDAP reconnect logic
+- **BREAKING:** LDAP StartTLS is no longer supported
+- **BREAKING:** LDAP reconnect logic (now there's a new connection for every request)
 
 ## [1.3.0] - 2019-01-07
 ### Changed
