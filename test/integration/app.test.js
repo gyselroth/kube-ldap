@@ -128,4 +128,51 @@ describe('test app routes', () => {
         done(error);
       });
   });
+  test('GET /metrics: 200 OK (enabled basic auth)', (done) => {
+    request(app)
+      .post('/metrics')
+      .auth(config.prometheus.username, config.prometheus.password)
+      .expect(200)
+      .end((error) => {
+        done(error);
+      });
+  });
+  test('GET /metrics: 200 OK (with disabled basic auth)', (done) => {
+    process.env.PROMETHEUS_USERNAME = '';
+    process.env.PROMETHEUS_PASSWORD = '';
+    request(app)
+      .post('/metrics')
+      .expect(200)
+      .end((error) => {
+        delete process.env.PROMETHEUS_USERNAME;
+        delete process.env.PROMETHEUS_PASSWORD;
+        done(error);
+      });
+  });
+  test('GET /metrics: 401 Unauthorized (No authorization header)', (done) => {
+    request(app)
+      .post('/metrics')
+      .expect(401)
+      .end((error) => {
+        done(error);
+      });
+  });
+  test('GET /metrics: 401 Unauthorized (Wrong username/password)', (done) => {
+    request(app)
+      .post('/metrics')
+      .auth('john.doe', 'secret')
+      .expect(401)
+      .end((error) => {
+        done(error);
+      });
+  });
+  test('GET /metrics: 401 Unauthorized (Wrong username/password)', (done) => {
+    request(app)
+      .post('/metrics')
+      .auth('john.doe', 'secret')
+      .expect(401)
+      .end((error) => {
+        done(error);
+      });
+  });
 });
