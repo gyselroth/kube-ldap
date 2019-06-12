@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Prometheus exporter on route "/metrics" (basic auth protected)
+
 ### Changed
 - *BREAKING*: Extra-Attributes and groups are now no longer included in the JWT issued after user authentication. Extra-Attributes and group memberships are now resolved during the token review and are included in the token review response
 - Internal: Use [ldapts](https://github.com/ldapts/ldapts) instead of [ldapjs](https://github.com/joyent/node-ldapjs) as ldap library

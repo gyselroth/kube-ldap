@@ -4,6 +4,8 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import morgan from 'morgan';
+import basicAuth from 'express-basic-auth';
+import prometheusBundle from 'express-prom-bundle';
 import {Client as Connection} from 'ldapts';
 import {config} from './config';
 import logger from './logger';
@@ -43,6 +45,17 @@ let tokenAuthentication = new TokenAuthentication(
   logger
 );
 
+// setup prometheus exporter
+let prometheusExporter = prometheusBundle({
+  includeMethod: true,
+  includePath: true,
+  promClient: {
+    collectDefaultMetrics: {
+      timeout: config.prometheus.nodejsProbeInterval,
+    },
+  },
+});
+
 // setup express
 const app = express();
 app.use(cors());
@@ -53,6 +66,17 @@ app.use(morgan('combined', {
     },
   },
 }));
+if (
+  Boolean(config.prometheus.username) &&
+  Boolean(config.prometheus.password)
+) {
+  app.use('/metrics', basicAuth({
+    users: {
+      [config.prometheus.username]: config.prometheus.password,
+    },
+  }));
+};
+app.use(prometheusExporter);
 app.get('/healthz', healthz.run);
 app.get('/auth', userAuthentication.run);
 app.post('/token', bodyParser.json(), tokenAuthentication.run);

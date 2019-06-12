@@ -157,6 +157,9 @@ List of configurable values:
 |`config.mapping.username`|Name of Ldap attribute to be used as username in kubernetes TokenReview|`MAPPING_USERNAME`|uid|
 |`config.jwt.key`|Key for signing the JWT. **DO NOT USE THE DEFAULT VALUE IN PRODUCTION**|`JWT_KEY`|secret|
 |`config.jwt.tokenLifetime`|Seconds until token a expires|`JWT_TOKEN_LIFETIME`|28800|
+|`config.prometheus.username`|Username for prometheus exporter basic auth (use empty string to disable basic auth)|`PROMETHEUS_USERNAME`|prometheus|
+|`config.prometheus.password`|Password for prometheus exporter basic auth (use empty string to disable basic auth)|`PROMETHEUS_PASSWORD`|secret|
+|`config.prometheus.nodejsProbeInterval`|Probe interval for nodejs metrics in milliseconds|`PROMETHEUS_NODEJS_PROBE_INTERVAL`|10000|
 
 ### kubernetes
 Configure your kubernetes apiserver to use the kube-ldap [webhook for authentication](https://kubernetes.io/docs/admin/authentication/#webhook-token-authentication) using the following configuration file.

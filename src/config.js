@@ -21,6 +21,13 @@ const parseArrayFromEnv = (
   return defaultValue;
 };
 
+const parseNullableFromEnv = (
+  env: ?string,
+  defaultValue: any,
+): any => {
+  return typeof(env) === 'undefined' ? defaultValue : null;
+};
+
 const getConfig = () => {
   let config = {
     loglevel: process.env.LOGLEVEL || 'info',
@@ -51,6 +58,16 @@ const getConfig = () => {
       cert: process.env.TLS_CERT_PATH || '/etc/ssl/kube-ldap/cert.pem',
       key: process.env.TLS_KEY_PATH || '/etc/ssl/kube-ldap/key.pem',
       ca: process.env.TLS_CA_PATH || null,
+    },
+    prometheus: {
+      username: parseNullableFromEnv(
+        process.env.PROMETHEUS_USERNAME,
+        'prometheus'
+        ),
+      password: parseNullableFromEnv(process.env.PROMETHEUS_PASSWORD, 'secret'),
+      nodejsProbeInterval: parseInt(
+        process.env.PROMETHEUS_NODEJS_PROBE_INTERVAL
+      ) || 10000,
     },
     port: 0,
   };
