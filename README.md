@@ -9,11 +9,11 @@ A [Webhook Token Authentication](https://kubernetes.io/docs/admin/authentication
 The kube-ldap webhook token authentication plugin can be used to integrate username/password authentication via LDAP for your kubernetes cluster.
 It exposes two API endpoints:
 * /auth
- * HTTP basic authenticated requests to this endpoint result in a JSON Web Token, signed by the webhook, including the username, uid and group memberships of the authenticated user.
- * The issued token can be used for authenticating to kubernetes.
+  * HTTP basic authenticated requests to this endpoint result in a JSON Web Token, signed by the webhook, including the username and uid of the authenticated user.
+  * The issued token can be used for authenticating to kubernetes.
 * /token
   * Is called by kubernetes (see [TokenReview](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.9/#tokenreview-v1-authentication)) to verify the token used for authentication.
-  * Verifies the integrity of the JWT (using the signature) and returns a TokenReview response containing the username, uid and group memberships of the authenticated user.
+  * Verifies the integrity of the JWT (using the signature) and returns a TokenReview response containing the username, uid, group memberships and extra attributes (if configured) of the authenticated user.
 
 ## Deployment
 The recommended way to deploy kube-ldap is deplyoing kube-ldap in kubernetes itself using the [gyselroth/kube-ldap](https://hub.docker.com/r/gyselroth/kube-ldap/) docker image.
