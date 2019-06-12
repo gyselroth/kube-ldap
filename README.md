@@ -9,11 +9,11 @@ A [Webhook Token Authentication](https://kubernetes.io/docs/admin/authentication
 The kube-ldap webhook token authentication plugin can be used to integrate username/password authentication via LDAP for your kubernetes cluster.
 It exposes two API endpoints:
 * /auth
- * HTTP basic authenticated requests to this endpoint result in a JSON Web Token, signed by the webhook, including the username, uid and group memberships of the authenticated user.
- * The issued token can be used for authenticating to kubernetes.
+  * HTTP basic authenticated requests to this endpoint result in a JSON Web Token, signed by the webhook, including the username and uid of the authenticated user.
+  * The issued token can be used for authenticating to kubernetes.
 * /token
   * Is called by kubernetes (see [TokenReview](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.9/#tokenreview-v1-authentication)) to verify the token used for authentication.
-  * Verifies the integrity of the JWT (using the signature) and returns a TokenReview response containing the username, uid and group memberships of the authenticated user.
+  * Verifies the integrity of the JWT (using the signature) and returns a TokenReview response containing the username, uid, group memberships and extra attributes (if configured) of the authenticated user.
 
 ## Deployment
 The recommended way to deploy kube-ldap is deplyoing kube-ldap in kubernetes itself using the [gyselroth/kube-ldap](https://hub.docker.com/r/gyselroth/kube-ldap/) docker image.
@@ -150,10 +150,6 @@ List of configurable values:
 |`config.ldap.baseDn`|Base DN for LDAP search|`LDAP_BASEDN`|dc=example,dc=com|
 |`config.ldap.filter`|Filter for LDAP search|`LDAP_FILTER`|(uid=%s)|
 |`config.ldap.timeout`|Timeout for LDAP connections & operations (in seconds)|`LDAP_TIMEOUT`|0 (infinite for operations, OS default for connections)|
-|`config.ldap.reconnectInitialDelay`|Milliseconds to wait before reconnecting|`LDAP_RECONN_INIT_DELAY`|100|
-|`config.ldap.reconnectMaxDelay`|Maximum milliseconds to wait before reconnecting|`LDAP_RECONN_MAX_DELAY`|1000|
-|`config.ldap.reconnectFailAfter`|Fail after number of retries|`LDAP_RECONN_FAIL_AFTER`|10|
-|`config.ldap.startTls`|Whether to use StartTLS for the LDAP connection or not|`LDAP_STARTTLS`|true|
 |`config.mapping.username`|Name of ldap attribute to be used as username in kubernetes TokenReview|`MAPPING_USERNAME`|uid|
 |`config.mapping.uid`|Name of ldap attribute to be used as uid in kubernetes TokenReview|`MAPPING_UID`|uid|
 |`config.mapping.groups`|Name of ldap attribute to be used for groups in kubernetes TokenReview|`MAPPING_GROUPS`|memberOf|
@@ -161,6 +157,9 @@ List of configurable values:
 |`config.mapping.username`|Name of Ldap attribute to be used as username in kubernetes TokenReview|`MAPPING_USERNAME`|uid|
 |`config.jwt.key`|Key for signing the JWT. **DO NOT USE THE DEFAULT VALUE IN PRODUCTION**|`JWT_KEY`|secret|
 |`config.jwt.tokenLifetime`|Seconds until token a expires|`JWT_TOKEN_LIFETIME`|28800|
+|`config.prometheus.username`|Username for prometheus exporter basic auth (use empty string to disable basic auth)|`PROMETHEUS_USERNAME`|prometheus|
+|`config.prometheus.password`|Password for prometheus exporter basic auth (use empty string to disable basic auth)|`PROMETHEUS_PASSWORD`|secret|
+|`config.prometheus.nodejsProbeInterval`|Probe interval for nodejs metrics in milliseconds|`PROMETHEUS_NODEJS_PROBE_INTERVAL`|10000|
 
 ### kubernetes
 Configure your kubernetes apiserver to use the kube-ldap [webhook for authentication](https://kubernetes.io/docs/admin/authentication/#webhook-token-authentication) using the following configuration file.

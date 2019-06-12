@@ -1,10 +1,11 @@
-import winston from 'winston';
+ import winston from 'winston';
 import {getResponseMock, getRequestMock} from '../mock';
 import TokenAuthentication from '../../../src/api/tokenAuthentication';
+import {Authenticator, Mapping} from '../../../src/ldap';
+jest.mock('../../../src/ldap/authenticator');
 
-const key = 'testsecret';
-const tokenAuthentication = new TokenAuthentication(key, winston);
 const fixtures = {
+  key: 'testsecret',
   validToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.ajB221IVz7aggEfTp3jUPc7UBw5xemmp-LmrmEgFETU',
   validTokenPayload: {
     sub: '1234567890',
@@ -35,10 +36,38 @@ const fixtures = {
       user: {},
     },
   },
+  mapping: new Mapping(
+    'uid',
+    'uid',
+    'memberOf',
+    [
+      'uidNumber',
+      'gidNumber',
+    ]
+  ),
+  validTokenResponse: {
+    username: 'john.doe',
+    groups: [
+      'test',
+    ],
+    extra: {
+      uidNumber: 1,
+      gidNumber: 10,
+    },
+    uid: 'john.doe',
+  },
 };
 
+let authenticator = new Authenticator();
+const tokenAuthentication = new TokenAuthentication(
+  authenticator,
+  fixtures.mapping,
+  fixtures.key,
+  winston
+);
+
 const generateRequestBody = (token) => {
-  let requestBody = fixtures.requestTemplate;
+  let requestBody = Object.assign({}, fixtures.requestTemplate);
   requestBody.spec.token = token;
   return requestBody;
 };
@@ -48,6 +77,19 @@ const generateAuthenticatedResponseBody = (payload) => {
   responseBody.status.user = payload;
   return responseBody;
 };
+
+beforeEach(() => {
+  authenticator.authenticated = true;
+  authenticator.attributes = {
+    uid: fixtures.validTokenResponse.username,
+    memberOf: fixtures.validTokenResponse.groups.map((group) => {
+      return 'cn=' + group + ',dc=example,dc=com';
+    }),
+    uidNumber: fixtures.validTokenResponse.extra.uidNumber,
+    gidNumber: fixtures.validTokenResponse.extra.gidNumber,
+  };
+  authenticator.getAttributesShouldThrowError = false;
+});
 
 describe('TokenAuthentication.extractAndVerifyToken()', () => {
   test('Returns token content', () => {
@@ -75,11 +117,11 @@ describe('TokenAuthentication.run()', () => {
     );
     const responseMock = getResponseMock();
 
-    tokenAuthentication.run(requestMock, responseMock);
-
-    expect(responseMock.send).toHaveBeenCalled();
-    expect(responseMock.send.mock.calls[0][0])
-      .toEqual(generateAuthenticatedResponseBody(fixtures.validTokenPayload));
+    return tokenAuthentication.run(requestMock, responseMock).then(() => {
+      expect(responseMock.send).toHaveBeenCalled();
+      expect(responseMock.send.mock.calls[0][0])
+        .toEqual(generateAuthenticatedResponseBody(fixtures.validTokenResponse));
+    });
   });
 
   test('Sends "not-authenticated" response on invalid token', () => {
@@ -88,11 +130,11 @@ describe('TokenAuthentication.run()', () => {
     );
     const responseMock = getResponseMock();
 
-    tokenAuthentication.run(requestMock, responseMock);
-
-    expect(responseMock.send).toHaveBeenCalled();
-    expect(responseMock.send.mock.calls[0][0])
-      .toEqual(fixtures.notAuthenticatedResponse);
+    return tokenAuthentication.run(requestMock, responseMock).then(() => {
+      expect(responseMock.send).toHaveBeenCalled();
+      expect(responseMock.send.mock.calls[0][0])
+        .toEqual(fixtures.notAuthenticatedResponse);
+    });
   });
 
   test('Sends "not-authenticated" response on invalid token', () => {
@@ -101,11 +143,11 @@ describe('TokenAuthentication.run()', () => {
     );
     const responseMock = getResponseMock();
 
-    tokenAuthentication.run(requestMock, responseMock);
-
-    expect(responseMock.send).toHaveBeenCalled();
-    expect(responseMock.send.mock.calls[0][0])
-      .toEqual(fixtures.notAuthenticatedResponse);
+    return tokenAuthentication.run(requestMock, responseMock).then(() => {
+      expect(responseMock.send).toHaveBeenCalled();
+      expect(responseMock.send.mock.calls[0][0])
+        .toEqual(fixtures.notAuthenticatedResponse);
+    });
   });
 
   test('Sends 400 response on invalid request', () => {
@@ -130,5 +172,19 @@ describe('TokenAuthentication.run()', () => {
     expect(responseMock.sendStatus).toHaveBeenCalled();
     expect(responseMock.sendStatus.mock.calls[0][0])
       .toEqual(400);
+  });
+
+  test('Sends "not-authenticated" on internal server error (e.g. ldap error)', () => {
+    authenticator.getAttributesShouldThrowError = true;
+    const requestMock = getRequestMock(
+      generateRequestBody(fixtures.validToken)
+    );
+    const responseMock = getResponseMock();
+
+    return tokenAuthentication.run(requestMock, responseMock).then(() => {
+      expect(responseMock.send).toHaveBeenCalled();
+      expect(responseMock.send.mock.calls[0][0])
+        .toEqual(fixtures.notAuthenticatedResponse);
+    });
   });
 });

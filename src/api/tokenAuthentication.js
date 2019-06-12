@@ -1,9 +1,12 @@
 // @flow
 import {Logger} from 'winston';
 import jwt from 'jsonwebtoken';
+import {Authenticator, Mapping} from '../ldap';
 
 /** Class for TokenAuthentication API route */
 export default class TokenAuthentication {
+  authenticator: Authenticator;
+  mapping: Mapping;
   key: string;
   logger: Logger;
   run: (Object, Object) => void
@@ -11,10 +14,19 @@ export default class TokenAuthentication {
 
   /**
   * Create API route
+  * @param {Authenticator} authenticator - Authenticator.
+  * @param {Mapping} mapping - Attribute mapping (kubernetes<=>ldap).
   * @param {string} key - Private key.
   * @param {Logger} logger - Logger to use.
   */
-  constructor(key: string, logger: Logger) {
+  constructor(
+    authenticator: Authenticator,
+    mapping: Mapping,
+    key: string,
+    logger: Logger
+  ) {
+    this.authenticator = authenticator;
+    this.mapping = mapping;
     this.key = key;
     this.logger = logger;
     this.run = this.run.bind(this);
@@ -26,7 +38,7 @@ export default class TokenAuthentication {
   * @param {Object} req - Request.
   * @param {Object} res - Response.
   */
-  run(req: Object, res: Object) {
+  async run(req: Object, res: Object): Promise<void> {
     if (
       !req.body.apiVersion ||
       !req.body.kind ||
@@ -40,28 +52,46 @@ export default class TokenAuthentication {
     ) {
       res.sendStatus(400);
     } else {
-      let responseData = {
-        apiVersion: 'authentication.k8s.io/v1beta1',
-        kind: 'TokenReview',
-        status: {
-          authenticated: false,
-          user: {},
-        },
-      };
-
       let token =req.body.spec.token;
       try {
-        let data = this.extractAndVerifyToken(token);
-        responseData.status.user = data;
-        responseData.status.authenticated = true;
+        let responseData = await this._processToken(token);
+        res.send(responseData);
       } catch (error) {
-        delete responseData.status.user;
-        responseData.status.authenticated = false;
-        this.logger.info('Error while verifying token: ' +
-          `[${error.name}] with message [${error.message}]`);
+        this.logger.error(error);
+        res.sendStatus(500);
       }
-      res.send(responseData);
     }
+  }
+
+  /**
+  * Process token
+  * @param {string} token - The token.
+  * @return {Object}
+  */
+  async _processToken(token: string): Promise<Object> {
+    let responseData = {
+      apiVersion: 'authentication.k8s.io/v1beta1',
+      kind: 'TokenReview',
+      status: {
+        authenticated: false,
+        user: {},
+      },
+    };
+    try {
+      let tokenData = this.extractAndVerifyToken(token);
+      let ldapObject = await this.authenticator.getAttributes(
+        tokenData.username,
+        this.mapping.getLdapAttributes()
+      );
+      responseData.status.user = this.mapping.ldapToKubernetes(ldapObject);
+      responseData.status.authenticated = true;
+    } catch (error) {
+      delete responseData.status.user;
+      responseData.status.authenticated = false;
+      this.logger.info('Error while verifying token: ' +
+        `[${error.name}] with message [${error.message}]`);
+    }
+    return responseData;
   }
 
   /**

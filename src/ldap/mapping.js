@@ -39,21 +39,29 @@ class Mapping {
   /**
   * Convert ldap object to kubernetes
   * @param {Object} ldapObject - Ldap object to convert
-  * @return {Ôbject}
+  * @param {boolean} withGroupAndExtra - Include groups and extra attributes
+  * @return {Object}
   */
-  ldapToKubernetes(ldapObject: Object): Object {
-    let object = {
+  ldapToKubernetes(ldapObject: Object, withGroupAndExtra: boolean = true): Object {
+    let groupAndExtra = {};
+    if (withGroupAndExtra) {
+      groupAndExtra = {
+        groups: this.getGroups(ldapObject).map((group) => {
+            return canonicalizeDn(group);
+          }),
+        extra: this.extraFields.reduce((object, field) => {
+          return {
+            ...object,
+            [field]: ldapObject[field],
+          };
+        }, {}),
+      };
+    }
+    return {
       username: ldapObject[this.username],
       uid: ldapObject[this.uid],
-      groups: this.getGroups(ldapObject).map((group) => {
-        return canonicalizeDn(group);
-      }),
-      extra: {},
+      ...groupAndExtra,
     };
-    for (let extraField of this.extraFields) {
-      object.extra[extraField] = ldapObject[extraField];
-    }
-    return object;
   }
 
   /**
@@ -66,7 +74,7 @@ class Mapping {
     if (groups instanceof Array) {
       return groups;
     } else {
-      return [groups];
+      return groups ? [groups] : [];
     }
   }
 }

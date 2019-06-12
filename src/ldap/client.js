@@ -5,8 +5,6 @@ export default class Client {
   basedn: string;
   binddn: string;
   bindpw: string;
-  startTls: boolean;
-  _secure: boolean;
 
   /**
   * Create an LDAP client.
@@ -14,22 +12,9 @@ export default class Client {
   * @param {string} basedn - The base DN to use.
   * @param {string} binddn - DN of the bind user to use.
   * @param {string} bindpw - Password of the bind user to use.
-  * @param {boolean} startTls - Whether to use StartTLS on the connection or not.
   */
-  constructor(conn: Object, basedn: string, binddn: string, bindpw: string, startTls: boolean) {
+  constructor(conn: Object, basedn: string, binddn: string, bindpw: string) {
     this.client = conn;
-    this.startTls = startTls;
-    this._secure = false;
-    if (this.startTls) {
-      this.client.on('connect', () => {
-        this.client.starttls({}, [], (err, res) => {
-          if (err) {
-            throw err;
-          }
-          this._secure = true;
-        });
-      });
-    }
     this.basedn = basedn;
     this.binddn = binddn;
     this.bindpw = bindpw;
@@ -41,19 +26,17 @@ export default class Client {
   * @param {string} password - Password to bind.
   * @return {Promise<boolean>}
   */
-  bind(dn: string, password: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      if (this.startTls && !this._secure) {
-        reject(new Error('ldap connection not tls protected'));
-      }
-      this.client.bind(dn, password, [], (err, res) => {
-        if (err) {
-          resolve(false);
-        } else {
-          resolve(true);
-        }
-      });
-    });
+  async bind(dn: string, password: string): Promise<boolean> {
+    let authenticated = false;
+    try {
+      await this.client.bind(dn, password, []);
+      authenticated = true;
+    } catch (error) {
+      authenticated = false;
+    } finally {
+      await this.client.unbind();
+    }
+    return authenticated;
   }
 
   /**
@@ -63,7 +46,7 @@ export default class Client {
   * @param {string} basedn - The base DN to use (optional).
   * @return {Promise} Promise fulfilled with search result
   */
-  search(
+  async search(
     filter: string,
     attributes: ?Array<string>,
     basedn: ?string
@@ -72,46 +55,24 @@ export default class Client {
       basedn = this.basedn;
     }
 
-    return new Promise((resolve, reject) => {
-      if (this.startTls && !this._secure) {
-        reject(new Error('ldap connection not tls protected'));
-      }
-      let that = this;
-      this.client.bind(this.binddn, this.bindpw, [], (err, res) => {
-        if (err) {
-          reject(err);
-        } else {
-          let options = {
-            filter: filter,
-            scope: 'sub',
-            attributes: attributes,
-          };
-          that.client.search(basedn, options, [], (err, res) => {
-            let searchResult = null;
-            if (err) {
-              reject(err);
-            } else {
-              res.on('searchEntry', function(entry) {
-                searchResult = entry.object;
-              });
-              res.on('error', function(err) {
-                reject(err);
-              });
-              res.on('end', function(result) {
-                if (result.status !== 0) {
-                  reject(result.status);
-                } else {
-                  if (searchResult) {
-                    resolve(searchResult);
-                  } else {
-                    reject(new Error(`no object found with filter [${filter}]`));
-                  }
-                }
-              });
-            }
-          });
-        }
-      });
-    });
+    let searchResult = null;
+    try {
+      await this.client.bind(this.binddn, this.bindpw, []);
+      const options = {
+        filter: filter,
+        scope: 'sub',
+        attributes: attributes,
+      };
+      searchResult = await this.client.search(basedn, options, []);
+    } catch (error) {
+      throw error;
+    } finally {
+      await this.client.unbind();
+    }
+    if (searchResult && searchResult.searchEntries.length > 0) {
+      return searchResult.searchEntries[0];
+    } else {
+      throw new Error(`no object found with filter [${filter}]`);
+    }
   }
 }

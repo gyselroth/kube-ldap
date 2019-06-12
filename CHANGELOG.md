@@ -6,6 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2019-06-12
+### Added
+- Prometheus exporter on route "/metrics" (basic auth protected)
+
+### Changed
+- **BREAKING:** Extra-Attributes and groups are now no longer included in the JWT issued after user authentication. Extra-Attributes and group memberships are now resolved during the token review and are included in the token review response
+- Internal: Use [ldapts](https://github.com/ldapts/ldapts) instead of [ldapjs](https://github.com/joyent/node-ldapjs) as ldap library
+
+### Fixed
+- Fix membership resolution for ldap objects without any membership
+
+### Removed
+- **BREAKING:** LDAP StartTLS is no longer supported
+- **BREAKING:** LDAP reconnect logic (now there's a new connection for every request)
+
 ## [1.3.0] - 2019-01-07
 ### Changed
 - Failed authentication sends a WWW-Authenticate header in the HTTP response
@@ -40,7 +55,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial key functionality
 
-[Unreleased]: https://github.com/gyselroth/kube-ldap/compare/v1.3.0...master
+[Unreleased]: https://github.com/gyselroth/kube-ldap/compare/v2.0.0...master
+[2.0.0]: https://github.com/gyselroth/kube-ldap/compare/v1.3.0...v2.0.0
+[1.3.0]: https://github.com/gyselroth/kube-ldap/compare/v1.2.1...v1.3.0
 [1.3.0]: https://github.com/gyselroth/kube-ldap/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/gyselroth/kube-ldap/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/gyselroth/kube-ldap/compare/v1.1.0...v1.2.0

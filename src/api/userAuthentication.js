@@ -2,14 +2,13 @@
 import {Logger} from 'winston';
 import atob from 'atob';
 import jwt from 'jsonwebtoken';
-import {Authenticator, Mapping} from '../ldap';
+import {Authenticator} from '../ldap';
 
 /** Class for UserAuthentication API route */
 export default class UserAuthentication {
   authenticator: Authenticator;
   tokenLifetime: number;
   key: string;
-  mapping: Mapping;
   logger: Logger;
   run: (Object, Object) => void
 
@@ -18,20 +17,17 @@ export default class UserAuthentication {
   * @param {Authenticator} authenticator - Authenticator.
   * @param {number} tokenLifetime - Token lifetime.
   * @param {string} key - Private key for token signing.
-  * @param {Mapping} mapping - Attribute mapping (kubernetes<=>ldap).
   * @param {Logger} logger - Logger to use.
   */
   constructor(
     authenticator: Authenticator,
     tokenLifetime: number,
     key: string,
-    mapping: Mapping,
     logger: Logger
   ) {
     this.authenticator = authenticator;
     this.tokenLifetime = tokenLifetime;
     this.key = key;
-    this.mapping = mapping;
     this.logger = logger;
     this.run = this.run.bind(this);
   }
@@ -56,19 +52,19 @@ export default class UserAuthentication {
           if (!success) {
             this._sendUnauthorized(res);
           } else {
-            return this.getToken(credentials.username).then((token) => {
-              res.send(token);
-            }, (error) => {
-              this.logger.error(error);
+            try {
+              res.send(this.getToken(credentials.username));
+            } catch (error) {
+              this.logger.error(error.message);
               res.sendStatus(500);
-            });
+            }
           }
         }, (error) => {
-          this.logger.info(error);
+          this.logger.error(error.message);
           res.sendStatus(500);
         });
       } catch (error) {
-        this.logger.info(error.message);
+        this.logger.error(error.message);
         res.sendStatus(400);
       }
     }
@@ -88,15 +84,9 @@ export default class UserAuthentication {
   * @param {string} username - Username.
   * @return {string}
   */
-  async getToken(username: string): Promise<string> {
+  getToken(username: string): Promise<string> {
     try {
-      let user = await this.authenticator.getAttributes(
-        username,
-        this.mapping.getLdapAttributes()
-      );
-
-      let data = this.mapping.ldapToKubernetes(user);
-      let token = jwt.sign(data, this.key, {
+      let token = jwt.sign({username: username}, this.key, {
         expiresIn: this.tokenLifetime,
       });
 
