@@ -16,7 +16,7 @@ const parseNullableFromEnv = (
   env: ?string,
   defaultValue: any,
 ): any => {
-  return typeof(env) === 'undefined' ? defaultValue : null;
+  return typeof(env) === 'undefined' ? defaultValue : (env || null);
 };
 
 const getConfig = () => {

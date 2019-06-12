@@ -97,6 +97,29 @@ const fixtures = {
     default: null,
     testValues: ['/etc/ssl/example.com/ca.pem'],
   },
+  'prometheus.username': {
+    env: 'PROMETHEUS_USERNAME',
+    default: 'prometheus',
+    testValues: [
+      {value: 'john.doe', expected: 'john.doe'},
+      {value: '', expected: null},
+    ],
+  },
+  'prometheus.password': {
+    env: 'PROMETHEUS_PASSWORD',
+    default: 'secret',
+    testValues: [
+      {value: 'password', expected: 'password'},
+      {value: '', expected: null},
+    ],
+  },
+  'prometheus.nodejsProbeInterval': {
+    env: 'PROMETHEUS_NODEJS_PROBE_INTERVAL',
+    default: 10000,
+    testValues: [
+      {value: '5000', expected: 5000},
+    ],
+  },
   'port': {
     env: 'PORT',
     default: 8081,
