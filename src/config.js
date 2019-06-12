@@ -1,13 +1,7 @@
 // @flow
 
 const parseBooleanFromEnv = (env: ?string, defaultValue: boolean): boolean => {
-  if (env == 'true') {
-    return true;
-  }
-  if (env == 'false') {
-    return false;
-  }
-  return defaultValue;
+  return env == 'true' ? true : (env == 'false' ? false : defaultValue);
 };
 
 const parseArrayFromEnv = (
@@ -15,10 +9,7 @@ const parseArrayFromEnv = (
   delimiter: string,
   defaultValue: Array<string>
 ): Array<string> => {
-  if (env) {
-    return env.split(delimiter);
-  }
-  return defaultValue;
+  return env ? env.split(delimiter) : defaultValue;
 };
 
 const parseNullableFromEnv = (
