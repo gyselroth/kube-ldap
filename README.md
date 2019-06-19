@@ -184,9 +184,11 @@ contexts:
 ```
 
 ### kubectl
-To configure `kubectl` initially:
+You can either use [kube-ldap-client-go-exec-plugin](https://github.com/gyselroth/kube-ldap-client-go-exec-plugin), a kubectl plugin ([client-go credential plugin](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins)) doing the authentication for you, or you can do it manually.
+
+To configure `kubectl` for manual authentication initially:
 ```bash
-curl TOKEN=$(https://your-kube-ldap-url/auth -u your-username)
+TOKEN=$(curl https://your-kube-ldap-url/auth -u your-username)
 kubectl config set-cluster your-cluster --server=https://your-apiserver-url [...]
 kubectl config set-credentials your-cluster-ldap --token="$TOKEN"
 kubectl config set-context your-cluster --cluster=your-cluster --user=your-cluster-ldap
@@ -194,7 +196,7 @@ kubectl config set-context your-cluster --cluster=your-cluster --user=your-clust
 
 To refresh your token after expiration:
 ```bash
-curl TOKEN=$(https://your-kube-ldap-url/auth -u your-username)
+TOKEN=$(curl https://your-kube-ldap-url/auth -u your-username)
 kubectl config set-credentials your-cluster-ldap --token="$TOKEN"
 ```
 
