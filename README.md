@@ -47,7 +47,7 @@ kind: Secret
 metadata:
   name: kube-ldap-tls
   namespace: kube-system
-type: kubernetes.io/tls
+type: Opaque
 ---
 apiVersion: apps/v1beta2
 kind: Deployment
