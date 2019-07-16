@@ -97,7 +97,7 @@ spec:
               key: key
         - name: JWT_TOKEN_LIFETIME
           value: #jwt token lifetime (see "Configuration" in README)
-        image: gyselroth/kube-ldap
+        image: gyselroth/kube-ldap:latest # Better use fixed version tag here since 'latest' can point to new major releases with breaking changes
         volumeMounts:
           - name: kube-ldap-tls
             mountPath: "/etc/ssl/kube-ldap"
