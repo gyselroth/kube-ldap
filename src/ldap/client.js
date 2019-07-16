@@ -1,20 +1,25 @@
 // @flow
 /** Class for an LDAP client */
 export default class Client {
-  client: Object;
+  clientFactory: () => Object;
   basedn: string;
   binddn: string;
   bindpw: string;
 
   /**
   * Create an LDAP client.
-  * @param {Object} conn - Ldap connection.
+  * @param {Function} connectionFactory - Ldap connection factory.
   * @param {string} basedn - The base DN to use.
   * @param {string} binddn - DN of the bind user to use.
   * @param {string} bindpw - Password of the bind user to use.
   */
-  constructor(conn: Object, basedn: string, binddn: string, bindpw: string) {
-    this.client = conn;
+  constructor(
+    connectionFactory: () => Object,
+    basedn: string,
+    binddn: string,
+    bindpw: string
+  ) {
+    this.clientFactory = connectionFactory;
     this.basedn = basedn;
     this.binddn = binddn;
     this.bindpw = bindpw;
@@ -27,14 +32,15 @@ export default class Client {
   * @return {Promise<boolean>}
   */
   async bind(dn: string, password: string): Promise<boolean> {
+    let client = this.clientFactory();
     let authenticated = false;
     try {
-      await this.client.bind(dn, password, []);
+      await client.bind(dn, password, []);
       authenticated = true;
     } catch (error) {
       authenticated = false;
     } finally {
-      await this.client.unbind();
+      await client.unbind();
     }
     return authenticated;
   }
@@ -51,23 +57,24 @@ export default class Client {
     attributes: ?Array<string>,
     basedn: ?string
   ): Promise<Object> {
+    let client = this.clientFactory();
     if (!basedn) {
       basedn = this.basedn;
     }
 
     let searchResult = null;
     try {
-      await this.client.bind(this.binddn, this.bindpw, []);
+      await client.bind(this.binddn, this.bindpw, []);
       const options = {
         filter: filter,
         scope: 'sub',
         attributes: attributes,
       };
-      searchResult = await this.client.search(basedn, options, []);
+      searchResult = await client.search(basedn, options, []);
     } catch (error) {
       throw error;
     } finally {
-      await this.client.unbind();
+      await client.unbind();
     }
     if (searchResult && searchResult.searchEntries.length > 0) {
       return searchResult.searchEntries[0];
