@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2019-07-16
+### Fixed
+- For every authentication or token review request a new ldap connection is used, instead using a single connection for all requests. This resolves problems where the single connection went unresponsive (https://github.com/gyselroth/kube-ldap/issues/27).
+
 ## [2.0.0] - 2019-06-12
 ### Added
 - Prometheus exporter on route "/metrics" (basic auth protected)
@@ -55,7 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial key functionality
 
-[Unreleased]: https://github.com/gyselroth/kube-ldap/compare/v2.0.0...master
+[Unreleased]: https://github.com/gyselroth/kube-ldap/compare/v2.0.1...master
+[2.0.1]: https://github.com/gyselroth/kube-ldap/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/gyselroth/kube-ldap/compare/v1.3.0...v2.0.0
 [1.3.0]: https://github.com/gyselroth/kube-ldap/compare/v1.2.1...v1.3.0
 [1.3.0]: https://github.com/gyselroth/kube-ldap/compare/v1.2.1...v1.3.0
