@@ -13,12 +13,15 @@ import {Client, Authenticator, Mapping} from './ldap';
 import {Healthz, UserAuthentication, TokenAuthentication} from './api';
 
 // setup basic dependencies
-let ldapClient = new Client(
-  new Connection({
+const connectionFactory = () => {
+  return new Connection({
     url: config.ldap.uri,
     timeout: config.ldap.timeout * 1000,
     connectTimeout: config.ldap.timeout * 1000,
-  }),
+  });
+};
+let ldapClient = new Client(
+  connectionFactory,
   config.ldap.baseDn,
   config.ldap.bindDn,
   config.ldap.bindPw,

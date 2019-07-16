@@ -19,16 +19,12 @@ const fixtures = {
 };
 
 let connection = new Connection();
+let connectionFactory = () => {
+  return connection;
+};
 let client = null;
 
 beforeEach(() => {
-  client = new Client(
-    connection,
-    fixtures.basedn,
-    fixtures.binddn,
-    fixtures.bindpw,
-    true
-  );
   connection.starttlsReturnsError = false;
   connection.bindReturnsError = false;
   connection.searchReturnsError = false;
@@ -39,6 +35,13 @@ beforeEach(() => {
     uid: fixtures.username,
     memberOf: fixtures.groups,
   };
+  client = new Client(
+    connectionFactory,
+    fixtures.basedn,
+    fixtures.binddn,
+    fixtures.bindpw,
+    true
+  );
 });
 
 describe('Client.bind()', () => {
