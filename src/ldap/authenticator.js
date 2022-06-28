@@ -28,6 +28,10 @@ export default class Authenticator {
   * @return {Promise<boolean>}
   */
   async authenticate(username: string, password: string): Promise<boolean> {
+    if (password === '') {
+      this.logger.info('empty password');
+      return false;
+    }
     let filter = util.format(this.filter, username);
     try {
       let user = await this.client.search(filter);
