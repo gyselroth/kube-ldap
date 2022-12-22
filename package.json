@@ -14,7 +14,7 @@
     "express": "^4.16.3",
     "express-basic-auth": "^1.2.0",
     "express-prom-bundle": "^5.1.5",
-    "jsonwebtoken": "^8.2.0",
+    "jsonwebtoken": "^9.0.0",
     "ldapts": "^1.7.0",
     "morgan": "^1.9.0",
     "prom-client": "^11.5.0",
